@@ -2,9 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { useDashboardData } from "@/app/protected/dashboard/dashboard-provider";
+import { useDashboardData } from "./dashboard-provider";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,10 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { AddInstitutionDialog } from "@/components/forms/add-institution-dialog";
+import { AddTransactionDialog } from "@/components/forms/add-transaction-dialog";
+import { AddCategoryDialog } from "@/components/forms/add-category-dialog";
+import { AdjustBalanceDialog } from "@/components/forms/adjust-balance-dialog";
 
 import {
-  Sparkles,
-  Plus,
   ArrowUpRight,
   ArrowDownRight,
   TrendingUp,
@@ -43,7 +44,11 @@ function withinTimeframe(dateStr: string, timeframe: Timeframe) {
 }
 
 export default function Dashboard() {
-  const { institutions, transactions } = useDashboardData();
+  const {
+    institutions,
+    transactions,
+    categories: allCategories,
+  } = useDashboardData();
   const [timeframe, setTimeframe] = useState<Timeframe>("Month");
 
   const cashBalance = useMemo(
@@ -99,10 +104,14 @@ export default function Dashboard() {
               Dashboard
             </h1>
           </div>
-          <Button className="h-11 rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600">
-            <Plus className="mr-2 h-4 w-4" />
-            Add institution
-          </Button>
+          <div className="flex items-center gap-3">
+            <AddTransactionDialog
+              institutions={institutions}
+              categories={allCategories}
+            />
+            <AddInstitutionDialog />
+            <AddCategoryDialog />
+          </div>
         </div>
 
         {/* Metric cards */}
@@ -169,9 +178,16 @@ export default function Dashboard() {
                       {a.type}
                     </span>
                   </div>
-                  <span className="text-sm font-semibold tabular-nums text-[#172033] dark:text-white">
-                    {currency(a.balance)}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-semibold tabular-nums text-[#172033] dark:text-white">
+                      {currency(a.balance)}
+                    </span>
+                    <AdjustBalanceDialog
+                      institutionId={a.id}
+                      institutionName={a.name}
+                      currentBalance={a.balance}
+                    />
+                  </div>
                 </div>
               ))}
             </CardContent>

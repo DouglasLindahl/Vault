@@ -3,13 +3,28 @@ import type {
   RecurringTransaction,
   RecurringTransactionInsert,
   RecurringTransactionUpdate,
+  RecurringTransactionWithRelations,
 } from "@/lib/types/database";
+
+const WITH_RELATIONS_SELECT =
+  "*, categories(name), institutions(name)" as const;
+
+function mapWithRelations(row: any): RecurringTransactionWithRelations {
+  const { categories, institutions, ...rest } = row;
+  return {
+    ...rest,
+    categoryName: categories?.name ?? "Uncategorized",
+    institutionName: institutions?.name ?? "Unknown",
+  };
+}
 
 export async function getRecurringTransactions(
   supabase: SupabaseClient,
   options?: { institutionId?: string; activeOnly?: boolean }
-): Promise<RecurringTransaction[]> {
-  let query = supabase.from("recurring_transactions").select("*");
+): Promise<RecurringTransactionWithRelations[]> {
+  let query = supabase
+    .from("recurring_transactions")
+    .select(WITH_RELATIONS_SELECT);
 
   if (options?.institutionId) {
     query = query.eq("institution_id", options.institutionId);
@@ -20,7 +35,7 @@ export async function getRecurringTransactions(
 
   const { data, error } = await query.order("created_at", { ascending: true });
   if (error) throw error;
-  return data;
+  return (data ?? []).map(mapWithRelations);
 }
 
 export async function createRecurringTransaction(

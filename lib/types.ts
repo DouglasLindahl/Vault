@@ -5,6 +5,12 @@ export type Institution = {
   balance: number;
 };
 
+export type CategoryOption = {
+  id: string;
+  name: string;
+  type: "income" | "expense";
+};
+
 export type Transaction = {
   id: string;
   name: string | null;
@@ -18,4 +24,5 @@ export type Transaction = {
 export type DashboardData = {
   institutions: Institution[];
   transactions: Transaction[];
+  categories: CategoryOption[];
 };

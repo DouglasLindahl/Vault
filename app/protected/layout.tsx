@@ -1,22 +1,24 @@
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { getCategories } from "@/lib/queries/categories";
 import { DashboardProvider } from "@/app/protected/dashboard/dashboard-provider";
+import { DashboardNav } from "@/components/nav/dashboard-nav";
 import type { DashboardData, Institution, Transaction } from "@/lib/types";
 
 async function getDashboardData(): Promise<DashboardData> {
   const supabase = await createClient();
 
+  const categories = await getCategories(supabase);
+
   const { data: institutionRows } = await supabase
     .from("institutions")
-    .select("id, name, type, starting_balance");
+    .select("id, name, type, current_balance");
 
-  // TODO: replace starting_balance with starting_balance + net of
-  // transactions since starting_balance_date once that calculation
-  // is wired up.
   const institutions: Institution[] = (institutionRows ?? []).map((row) => ({
     id: row.id,
     name: row.name,
     type: row.type,
-    balance: row.starting_balance,
+    balance: row.current_balance,
   }));
 
   const { data: transactionRows } = await supabase
@@ -39,15 +41,26 @@ async function getDashboardData(): Promise<DashboardData> {
     }),
   );
 
-  return { institutions, transactions };
+  return { institutions, transactions, categories };
 }
 
-export default async function DashboardLayout({
+async function DashboardData({ children }: { children: React.ReactNode }) {
+  const data = await getDashboardData();
+
+  return <DashboardProvider data={data}>{children}</DashboardProvider>;
+}
+
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const data = await getDashboardData();
-
-  return <DashboardProvider data={data}>{children}</DashboardProvider>;
+  return (
+    <>
+      <DashboardNav />
+      <Suspense>
+        <DashboardData>{children}</DashboardData>
+      </Suspense>
+    </>
+  );
 }

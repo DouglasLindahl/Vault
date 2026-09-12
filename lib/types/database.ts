@@ -4,7 +4,7 @@
 
 export type InstitutionType = "bank" | "crypto";
 export type Direction = "in" | "out";
-export type Frequency = "weekly" | "monthly";
+export type Frequency = "daily" | "weekly" | "biweekly" | "monthly" | "yearly";
 
 // ---------------------------------------------------
 // institutions
@@ -16,6 +16,7 @@ export type Institution = {
   type: InstitutionType;
   starting_balance: number;
   starting_balance_date: string; // date
+  current_balance: number;
   created_at: string;
 };
 
@@ -25,6 +26,7 @@ export type InstitutionInsert = {
   type: InstitutionType;
   starting_balance?: number;
   starting_balance_date?: string;
+  current_balance?: number;
 };
 
 export type InstitutionUpdate = Partial<
@@ -63,6 +65,7 @@ export type RecurringTransaction = {
   amount: number;
   direction: Direction;
   frequency: Frequency;
+  start_date: string; // date
   is_estimate: boolean;
   active: boolean;
   created_at: string;
@@ -76,8 +79,15 @@ export type RecurringTransactionInsert = {
   amount: number;
   direction: Direction;
   frequency: Frequency;
+  start_date: string;
   is_estimate?: boolean;
   active?: boolean;
+};
+
+// Recurring transaction joined with its category + institution name.
+export type RecurringTransactionWithRelations = RecurringTransaction & {
+  categoryName: string;
+  institutionName: string;
 };
 
 export type RecurringTransactionUpdate = Partial<

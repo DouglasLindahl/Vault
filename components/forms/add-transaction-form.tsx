@@ -4,12 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { createTransaction } from "@/lib/queries/transactions";
-import type { Category, Direction, Institution } from "@/lib/types/database";
+import { createRecurringTransaction } from "@/lib/queries/recurring-transactions";
+import type { Direction, Frequency } from "@/lib/types/database";
+import { cn } from "@/lib/utils";
+
+type InstitutionOption = { id: string; name: string };
+type CategoryOption = { id: string; name: string };
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -25,9 +30,11 @@ function today() {
 export function AddTransactionForm({
   institutions,
   categories,
+  onSuccess,
 }: {
-  institutions: Institution[];
-  categories: Category[];
+  institutions: InstitutionOption[];
+  categories: CategoryOption[];
+  onSuccess?: () => void;
 }) {
   const router = useRouter();
 
@@ -37,6 +44,8 @@ export function AddTransactionForm({
   const [direction, setDirection] = useState<Direction>("out");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(today());
+  const [recurring, setRecurring] = useState(false);
+  const [frequency, setFrequency] = useState<Frequency>("monthly");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,18 +66,35 @@ export function AddTransactionForm({
       } = await supabase.auth.getUser();
       if (!user) throw new Error("You need to be logged in.");
 
-      await createTransaction(supabase, {
-        user_id: user.id,
-        institution_id: institutionId,
-        category_id: categoryId,
-        name: name.trim() || null,
-        amount: Number(amount),
-        direction,
-        date,
-      });
+      if (recurring) {
+        await createRecurringTransaction(supabase, {
+          user_id: user.id,
+          institution_id: institutionId,
+          category_id: categoryId,
+          name: name.trim() || null,
+          amount: Number(amount),
+          direction,
+          frequency,
+          start_date: date,
+        });
+      } else {
+        await createTransaction(supabase, {
+          user_id: user.id,
+          institution_id: institutionId,
+          category_id: categoryId,
+          name: name.trim() || null,
+          amount: Number(amount),
+          direction,
+          date,
+        });
+      }
 
-      router.push("/dashboard");
-      router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -77,13 +103,7 @@ export function AddTransactionForm({
   }
 
   return (
-    <Card className="rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] dark:border-white/[0.07] dark:bg-[#141416]/95">
-      <CardHeader>
-        <CardTitle className="text-xl text-[#172033] dark:text-white">Add transaction</CardTitle>
-        <CardDescription>Log a one-off in or out for any account.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label>Institution</Label>
@@ -129,7 +149,7 @@ export function AddTransactionForm({
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label>Direction</Label>
               <Select value={direction} onValueChange={(v) => setDirection(v as Direction)}>
@@ -155,9 +175,16 @@ export function AddTransactionForm({
                 className="h-11 rounded-2xl"
               />
             </div>
+          </div>
 
+          <div
+            className={cn(
+              "grid grid-cols-1 gap-4",
+              recurring && "sm:grid-cols-2",
+            )}
+          >
             <div className="grid gap-2">
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date">{recurring ? "Start date" : "Date"}</Label>
               <Input
                 id="date"
                 type="date"
@@ -166,6 +193,36 @@ export function AddTransactionForm({
                 className="h-11 rounded-2xl"
               />
             </div>
+
+            {recurring && (
+              <div className="grid gap-2">
+                <Label>Frequency</Label>
+                <Select value={frequency} onValueChange={(v) => setFrequency(v as Frequency)}>
+                  <SelectTrigger className="h-11 rounded-2xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="daily">Daily</SelectItem>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between rounded-2xl border border-[#e5e2da] px-4 py-3 dark:border-white/[0.07]">
+            <div>
+              <p className="text-sm font-medium text-[#172033] dark:text-white">
+                Recurring
+              </p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Repeats on a schedule instead of happening once.
+              </p>
+            </div>
+            <Switch checked={recurring} onCheckedChange={setRecurring} />
           </div>
 
           {error && (
@@ -179,10 +236,8 @@ export function AddTransactionForm({
             disabled={isLoading}
             className="h-12 rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
           >
-            {isLoading ? "Saving..." : "Save transaction"}
+            {isLoading ? "Saving..." : recurring ? "Save recurring transaction" : "Save transaction"}
           </Button>
-        </form>
-      </CardContent>
-    </Card>
+    </form>
   );
 }

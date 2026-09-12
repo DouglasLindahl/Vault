@@ -40,7 +40,10 @@ export async function createInstitution(
 ): Promise<Institution> {
   const { data, error } = await supabase
     .from("institutions")
-    .insert(input)
+    .insert({
+      ...input,
+      current_balance: input.current_balance ?? input.starting_balance ?? 0,
+    })
     .select()
     .single();
 

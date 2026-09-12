@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { createInstitution } from "@/lib/queries/institutions";
-import type { InstitutionType } from "@/lib/types/database";
+import { createCategory } from "@/lib/queries/categories";
+import type { CategoryType } from "@/lib/types/database";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,12 +17,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
+export function AddCategoryForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
 
   const [name, setName] = useState("");
-  const [type, setType] = useState<InstitutionType>("bank");
-  const [startingBalance, setStartingBalance] = useState("");
+  const [type, setType] = useState<CategoryType>("expense");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,7 +30,7 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
     setError(null);
 
     if (!name.trim()) {
-      setError("Give the institution a name.");
+      setError("Give the category a name.");
       return;
     }
 
@@ -44,17 +43,18 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("You need to be logged in.");
 
-      await createInstitution(supabase, {
+      await createCategory(supabase, {
         user_id: user.id,
         name: name.trim(),
         type,
-        starting_balance: startingBalance ? Number(startingBalance) : 0,
       });
+
+      setName("");
+      setType("expense");
 
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/dashboard");
         router.refresh();
       }
     } catch (err: unknown) {
@@ -68,10 +68,10 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
-          <Label htmlFor="institution-name">Name</Label>
+          <Label htmlFor="category-name">Name</Label>
           <Input
-            id="institution-name"
-            placeholder="SEB"
+            id="category-name"
+            placeholder="Groceries"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="h-11 rounded-2xl"
@@ -79,29 +79,16 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
         </div>
         <div className="grid gap-2">
           <Label>Type</Label>
-          <Select value={type} onValueChange={(v) => setType(v as InstitutionType)}>
+          <Select value={type} onValueChange={(v) => setType(v as CategoryType)}>
             <SelectTrigger className="h-11 rounded-2xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="bank">Bank</SelectItem>
-              <SelectItem value="crypto">Crypto</SelectItem>
+              <SelectItem value="expense">Expense</SelectItem>
+              <SelectItem value="income">Income</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="starting-balance">Current balance</Label>
-        <Input
-          id="starting-balance"
-          type="number"
-          step="0.01"
-          placeholder="300.00"
-          value={startingBalance}
-          onChange={(e) => setStartingBalance(e.target.value)}
-          className="h-11 rounded-2xl sm:w-48"
-        />
       </div>
 
       {error && (
@@ -115,7 +102,7 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
         disabled={isLoading}
         className="h-12 rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
       >
-        {isLoading ? "Saving..." : "Save institution"}
+        {isLoading ? "Saving..." : "Save category"}
       </Button>
     </form>
   );
