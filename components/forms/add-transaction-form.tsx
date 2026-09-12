@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { createTransaction } from "@/lib/queries/transactions";
 import { createRecurringTransaction } from "@/lib/queries/recurring-transactions";
 import type { Direction, Frequency } from "@/lib/types/database";
-import { cn } from "@/lib/utils";
+import { cn, todayDateOnly } from "@/lib/utils";
 
 type InstitutionOption = { id: string; name: string };
 type CategoryOption = { id: string; name: string };
@@ -22,10 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 export function AddTransactionForm({
   institutions,
@@ -43,7 +39,7 @@ export function AddTransactionForm({
   const [name, setName] = useState("");
   const [direction, setDirection] = useState<Direction>("out");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(today());
+  const [date, setDate] = useState(todayDateOnly());
   const [recurring, setRecurring] = useState(false);
   const [frequency, setFrequency] = useState<Frequency>("monthly");
   const [error, setError] = useState<string | null>(null);

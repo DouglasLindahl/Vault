@@ -2,9 +2,10 @@
 // Keep these in sync with the SQL schema — this is the single
 // source of truth for table shapes across the app.
 
-export type InstitutionType = "bank" | "crypto";
+export type InstitutionType = "bank" | "investment";
 export type Direction = "in" | "out";
 export type Frequency = "daily" | "weekly" | "biweekly" | "monthly" | "yearly";
+export type AssetType = "crypto" | "stock" | "cash";
 
 // ---------------------------------------------------
 // institutions
@@ -17,6 +18,7 @@ export type Institution = {
   starting_balance: number;
   starting_balance_date: string; // date
   current_balance: number;
+  sort_order: number;
   created_at: string;
 };
 
@@ -27,6 +29,7 @@ export type InstitutionInsert = {
   starting_balance?: number;
   starting_balance_date?: string;
   current_balance?: number;
+  sort_order?: number;
 };
 
 export type InstitutionUpdate = Partial<
@@ -133,32 +136,36 @@ export type TransactionWithRelations = Transaction & {
 };
 
 // ---------------------------------------------------
-// crypto_holdings
+// crypto_holdings (investment holdings — stocks and crypto)
 // ---------------------------------------------------
-export type CryptoHolding = {
+export type InvestmentHolding = {
   id: string;
   user_id: string;
   institution_id: string;
   asset_symbol: string;
+  asset_type: AssetType;
+  coingecko_id: string | null;
   quantity: number;
   updated_at: string;
 };
 
-export type CryptoHoldingInsert = {
+export type InvestmentHoldingInsert = {
   user_id: string;
   institution_id: string;
   asset_symbol: string;
+  asset_type: AssetType;
+  coingecko_id?: string | null;
   quantity?: number;
 };
 
-export type CryptoHoldingUpdate = Partial<
-  Omit<CryptoHoldingInsert, "user_id" | "institution_id" | "asset_symbol">
+export type InvestmentHoldingUpdate = Partial<
+  Omit<InvestmentHoldingInsert, "user_id" | "institution_id" | "asset_symbol">
 >;
 
 // ---------------------------------------------------
-// crypto_conversions
+// crypto_conversions (investment purchase/conversion events)
 // ---------------------------------------------------
-export type CryptoConversion = {
+export type InvestmentConversion = {
   id: string;
   user_id: string;
   institution_id: string;
@@ -169,7 +176,7 @@ export type CryptoConversion = {
   created_at: string;
 };
 
-export type CryptoConversionInsert = {
+export type InvestmentConversionInsert = {
   user_id: string;
   institution_id: string;
   usd_amount: number;

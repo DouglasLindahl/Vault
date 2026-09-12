@@ -6,6 +6,7 @@ import { getCategories } from "@/lib/queries/categories";
 import { AddTransactionDialog } from "@/components/forms/add-transaction-dialog";
 import { DeleteRowButton } from "@/components/forms/delete-row-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { parseDateOnly } from "@/lib/utils";
 
 function currency(n: number) {
   const sign = n < 0 ? "-" : "";
@@ -56,7 +57,7 @@ async function TransactionsList() {
                 </p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400">
                   {t.institutionName} · {t.categoryName} ·{" "}
-                  {new Date(t.date).toLocaleDateString(undefined, {
+                  {parseDateOnly(t.date).toLocaleDateString(undefined, {
                     month: "short",
                     day: "numeric",
                     year: "numeric",

@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { cn, parseDateOnly } from "@/lib/utils";
 import { useDashboardData } from "./dashboard-provider";
+import { nextOccurrence } from "@/lib/recurrence";
 
 import {
   Card,
@@ -14,7 +16,7 @@ import {
 import { AddInstitutionDialog } from "@/components/forms/add-institution-dialog";
 import { AddTransactionDialog } from "@/components/forms/add-transaction-dialog";
 import { AddCategoryDialog } from "@/components/forms/add-category-dialog";
-import { AdjustBalanceDialog } from "@/components/forms/adjust-balance-dialog";
+import { SortableAccountsList } from "@/components/accounts/sortable-accounts-list";
 
 import {
   ArrowUpRight,
@@ -22,6 +24,7 @@ import {
   TrendingUp,
   Wallet,
   PiggyBank,
+  Repeat,
 } from "lucide-react";
 
 const timeframes = ["Week", "Month", "Year"] as const;
@@ -36,7 +39,7 @@ function currency(n: number) {
 }
 
 function withinTimeframe(dateStr: string, timeframe: Timeframe) {
-  const date = new Date(dateStr);
+  const date = parseDateOnly(dateStr);
   const now = new Date();
   const days = timeframe === "Week" ? 7 : timeframe === "Month" ? 30 : 365;
   const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
@@ -47,6 +50,7 @@ export default function Dashboard() {
   const {
     institutions,
     transactions,
+    recurringTransactions,
     categories: allCategories,
   } = useDashboardData();
   const [timeframe, setTimeframe] = useState<Timeframe>("Month");
@@ -58,14 +62,14 @@ export default function Dashboard() {
         .reduce((s, a) => s + a.balance, 0),
     [institutions],
   );
-  const cryptoBalance = useMemo(
+  const investmentsBalance = useMemo(
     () =>
       institutions
-        .filter((a) => a.type === "crypto")
+        .filter((a) => a.type === "investment")
         .reduce((s, a) => s + a.balance, 0),
     [institutions],
   );
-  const netWorth = cashBalance + cryptoBalance;
+  const netWorth = cashBalance + investmentsBalance;
 
   const categorySpend = useMemo(() => {
     const totals = new Map<string, number>();
@@ -85,9 +89,18 @@ export default function Dashboard() {
   const recentActivity = useMemo(
     () =>
       [...transactions]
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .sort((a, b) => parseDateOnly(b.date).getTime() - parseDateOnly(a.date).getTime())
         .slice(0, 5),
     [transactions],
+  );
+
+  const upcomingRecurring = useMemo(
+    () =>
+      recurringTransactions
+        .map((r) => ({ ...r, next: nextOccurrence(r.startDate, r.frequency) }))
+        .sort((a, b) => a.next.getTime() - b.next.getTime())
+        .slice(0, 6),
+    [recurringTransactions],
   );
 
   return (
@@ -142,12 +155,12 @@ export default function Dashboard() {
 
           <Card className="rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardDescription>Crypto value</CardDescription>
+              <CardDescription>Investments value</CardDescription>
               <PiggyBank className="h-4 w-4 text-[#315cff] dark:text-pink-400" />
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold tabular-nums text-[#172033] dark:text-white">
-                {currency(cryptoBalance)}
+                {currency(investmentsBalance)}
               </p>
             </CardContent>
           </Card>
@@ -164,32 +177,8 @@ export default function Dashboard() {
                 Balances across every institution
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-1">
-              {institutions.map((a) => (
-                <div
-                  key={a.id}
-                  className="flex items-center justify-between rounded-xl px-2 py-2.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-sm font-medium text-[#172033] dark:text-white">
-                      {a.name}
-                    </span>
-                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400">
-                      {a.type}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-semibold tabular-nums text-[#172033] dark:text-white">
-                      {currency(a.balance)}
-                    </span>
-                    <AdjustBalanceDialog
-                      institutionId={a.id}
-                      institutionName={a.name}
-                      currentBalance={a.balance}
-                    />
-                  </div>
-                </div>
-              ))}
+            <CardContent>
+              <SortableAccountsList institutions={institutions} />
             </CardContent>
           </Card>
 
@@ -247,6 +236,62 @@ export default function Dashboard() {
           </Card>
         </div>
 
+        {/* Upcoming recurring */}
+        <Card className="mt-6 rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base text-[#172033] dark:text-white">
+              Upcoming recurring
+            </CardTitle>
+            <Link
+              href="/protected/dashboard/recurring-transactions"
+              className="text-xs font-medium text-[#315cff] dark:text-pink-400"
+            >
+              See all
+            </Link>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-1">
+            {upcomingRecurring.length === 0 && (
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                No recurring transactions yet.
+              </p>
+            )}
+            {upcomingRecurring.map((r) => (
+              <div
+                key={r.id}
+                className="flex items-center justify-between rounded-xl px-2 py-2.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400">
+                    <Repeat className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-[#172033] dark:text-white">
+                      {r.name ?? r.category}
+                    </p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                      {r.institutionName} · next{" "}
+                      {r.next.toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <span
+                  className={cn(
+                    "text-sm font-semibold tabular-nums",
+                    r.direction === "in"
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-[#172033] dark:text-white",
+                  )}
+                >
+                  {r.direction === "in" ? currency(r.amount) : currency(-r.amount)}
+                </span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
         {/* Recent activity */}
         <Card className="mt-6 rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
           <CardHeader>
@@ -286,7 +331,7 @@ export default function Dashboard() {
                     </p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {t.institutionName} ·{" "}
-                      {new Date(t.date).toLocaleDateString(undefined, {
+                      {parseDateOnly(t.date).toLocaleDateString(undefined, {
                         month: "short",
                         day: "numeric",
                       })}

@@ -6,12 +6,14 @@ import { Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { deleteTransaction } from "@/lib/queries/transactions";
 import { deleteRecurringTransaction } from "@/lib/queries/recurring-transactions";
+import { deleteCategory } from "@/lib/queries/categories";
+import { deleteConversion } from "@/lib/queries/investments";
 
 export function DeleteRowButton({
   kind,
   id,
 }: {
-  kind: "transaction" | "recurring-transaction";
+  kind: "transaction" | "recurring-transaction" | "category" | "investment";
   id: string;
 }) {
   const router = useRouter();
@@ -23,8 +25,12 @@ export function DeleteRowButton({
       const supabase = createClient();
       if (kind === "transaction") {
         await deleteTransaction(supabase, id);
-      } else {
+      } else if (kind === "recurring-transaction") {
         await deleteRecurringTransaction(supabase, id);
+      } else if (kind === "investment") {
+        await deleteConversion(supabase, id);
+      } else {
+        await deleteCategory(supabase, id);
       }
       router.refresh();
     } finally {

@@ -85,7 +85,7 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="bank">Bank</SelectItem>
-              <SelectItem value="crypto">Crypto</SelectItem>
+              <SelectItem value="investment">Investment</SelectItem>
             </SelectContent>
           </Select>
         </div>

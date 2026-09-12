@@ -14,7 +14,7 @@ export async function getInstitutions(
   const { data, error } = await supabase
     .from("institutions")
     .select("*")
-    .order("created_at", { ascending: true });
+    .order("sort_order", { ascending: true });
 
   if (error) throw error;
   return data;
@@ -73,4 +73,15 @@ export async function deleteInstitution(
 ): Promise<void> {
   const { error } = await supabase.from("institutions").delete().eq("id", id);
   if (error) throw error;
+}
+
+export async function reorderInstitutions(
+  supabase: SupabaseClient,
+  orderedIds: string[]
+): Promise<void> {
+  await Promise.all(
+    orderedIds.map((id, index) =>
+      updateInstitution(supabase, id, { sort_order: index })
+    )
+  );
 }

@@ -8,6 +8,8 @@ const links = [
   { href: "/protected/dashboard", label: "Dashboard" },
   { href: "/protected/dashboard/transactions", label: "Transactions" },
   { href: "/protected/dashboard/recurring-transactions", label: "Recurring" },
+  { href: "/protected/dashboard/categories", label: "Categories" },
+  { href: "/protected/dashboard/stats", label: "Stats" },
 ];
 
 export function DashboardNav() {

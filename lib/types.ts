@@ -1,7 +1,7 @@
 export type Institution = {
   id: string;
   name: string;
-  type: "bank" | "crypto";
+  type: "bank" | "investment";
   balance: number;
 };
 
@@ -21,8 +21,20 @@ export type Transaction = {
   date: string; // ISO date string
 };
 
+export type RecurringTransaction = {
+  id: string;
+  name: string | null;
+  category: string;
+  institutionName: string;
+  amount: number;
+  direction: "in" | "out";
+  frequency: "daily" | "weekly" | "biweekly" | "monthly" | "yearly";
+  startDate: string; // ISO date string
+};
+
 export type DashboardData = {
   institutions: Institution[];
   transactions: Transaction[];
+  recurringTransactions: RecurringTransaction[];
   categories: CategoryOption[];
 };
