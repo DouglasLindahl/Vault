@@ -6,6 +6,7 @@ import { getCategories } from "@/lib/queries/categories";
 import { AddTransactionDialog } from "@/components/forms/add-transaction-dialog";
 import { DeleteRowButton } from "@/components/forms/delete-row-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageLoading } from "@/components/ui/spinner";
 import { parseDateOnly } from "@/lib/utils";
 
 function currency(n: number) {
@@ -51,11 +52,11 @@ async function TransactionsList() {
               key={t.id}
               className="flex items-center justify-between rounded-xl px-2 py-2.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]"
             >
-              <div>
-                <p className="text-sm font-medium text-[#172033] dark:text-white">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-[#172033] dark:text-white">
                   {t.name ?? t.categoryName}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
                   {t.institutionName} · {t.categoryName} ·{" "}
                   {parseDateOnly(t.date).toLocaleDateString(undefined, {
                     month: "short",
@@ -64,7 +65,7 @@ async function TransactionsList() {
                   })}
                 </p>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex shrink-0 items-center gap-1">
                 <span
                   className={
                     t.direction === "in"
@@ -88,7 +89,7 @@ export default function TransactionsPage() {
   return (
     <div className="relative flex min-h-screen bg-zinc-50 dark:bg-[#0c0c0e]">
       <div className="flex-1 px-6 py-10 md:px-10">
-        <Suspense>
+        <Suspense fallback={<PageLoading />}>
           <TransactionsList />
         </Suspense>
       </div>

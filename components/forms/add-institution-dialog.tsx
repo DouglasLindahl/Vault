@@ -27,7 +27,11 @@ export function AddInstitutionDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="h-11 rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-9 rounded-xl border border-[#e5e2da] text-zinc-500 dark:border-white/[0.07] dark:text-zinc-400"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Add institution
         </Button>

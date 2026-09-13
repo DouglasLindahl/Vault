@@ -4,6 +4,7 @@ import { getCategories } from "@/lib/queries/categories";
 import { getInvestmentSummary } from "@/lib/queries/investments";
 import { DashboardProvider } from "@/app/protected/dashboard/dashboard-provider";
 import { DashboardNav } from "@/components/nav/dashboard-nav";
+import { PageLoading } from "@/components/ui/spinner";
 import type {
   DashboardData,
   Institution,
@@ -100,7 +101,7 @@ export default function DashboardLayout({
       <Suspense>
         <DashboardNav />
       </Suspense>
-      <Suspense>
+      <Suspense fallback={<PageLoading />}>
         <DashboardData>{children}</DashboardData>
       </Suspense>
     </>

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import vaultLogo from "@/app/icons/vaultLogo.png";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,21 +17,24 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
-import { ArrowRight, LockKeyhole, Mail, Sparkles } from "lucide-react";
+import { ArrowRight, LockKeyhole, Mail } from "lucide-react";
 
 type AuthMode = "login" | "register";
 
 export function AuthForm({
   className,
+  initialMode = "login",
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
-  const [mode, setMode] = useState<AuthMode>("login");
+}: React.ComponentPropsWithoutRef<"div"> & { initialMode?: AuthMode }) {
+  const [mode, setMode] = useState<AuthMode>(initialMode);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,6 +45,7 @@ export function AuthForm({
     setError(null);
     setPassword("");
     setConfirmPassword("");
+    setAgreedToTerms(false);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -72,6 +78,10 @@ export function AuthForm({
         throw new Error("Password must be at least 8 characters.");
       }
 
+      if (!agreedToTerms) {
+        throw new Error("You need to agree to the Terms and Conditions.");
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -100,9 +110,11 @@ export function AuthForm({
 
       {/* BRAND */}
       <div className="text-center">
-        <div className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-br dark:from-pink-500 dark:to-fuchsia-600">
-          <Sparkles className="h-5 w-5" />
-        </div>
+        <Image
+          src={vaultLogo}
+          alt="Vault"
+          className="mx-auto mb-4 h-11 w-11 rounded-2xl object-contain"
+        />
 
         <p className="text-sm font-semibold tracking-wide text-[#315cff] dark:text-pink-400">
           VAULT
@@ -224,6 +236,33 @@ export function AuthForm({
                 </div>
               )}
 
+              {mode === "register" && (
+                <div className="flex items-start gap-2.5">
+                  <Checkbox
+                    id="agree-to-terms"
+                    checked={agreedToTerms}
+                    onCheckedChange={(checked) =>
+                      setAgreedToTerms(checked === true)
+                    }
+                    className="mt-0.5"
+                  />
+                  <Label
+                    htmlFor="agree-to-terms"
+                    className="text-sm font-normal leading-snug text-zinc-500 dark:text-zinc-400"
+                  >
+                    I agree to the{" "}
+                    <a
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-[#172033] underline underline-offset-4 dark:text-white"
+                    >
+                      Terms and Conditions
+                    </a>
+                  </Label>
+                </div>
+              )}
+
               {error && (
                 <div className="rounded-2xl bg-red-500/[0.07] px-4 py-3 text-sm text-red-600 dark:text-red-400">
                   {error}
@@ -232,7 +271,7 @@ export function AuthForm({
 
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || (mode === "register" && !agreedToTerms)}
                 className="group h-12 w-full rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
               >
                 {isLoading

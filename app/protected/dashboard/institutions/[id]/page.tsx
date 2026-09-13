@@ -11,6 +11,7 @@ import { AddHoldingDialog } from "@/components/forms/add-holding-dialog";
 import { DeleteRowButton } from "@/components/forms/delete-row-button";
 import { DeleteInstitutionDialog } from "@/components/forms/delete-institution-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageLoading } from "@/components/ui/spinner";
 import { parseDateOnly } from "@/lib/utils";
 
 function currency(n: number) {
@@ -78,7 +79,7 @@ async function InstitutionDetail({ id }: { id: string }) {
             {institution.name}
           </h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-2xl font-bold tabular-nums text-[#172033] dark:text-white">
             {currency(displayBalance)}
           </span>
@@ -117,12 +118,12 @@ async function InstitutionDetail({ id }: { id: string }) {
                   key={h.id}
                   className="flex items-center justify-between rounded-xl px-2 py-2.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]"
                 >
-                  <div>
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-sm font-medium text-[#172033] dark:text-white">
+                  <div className="min-w-0">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className="truncate text-sm font-medium text-[#172033] dark:text-white">
                         {h.quantity} {h.symbol}
                       </span>
-                      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400">
+                      <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400">
                         {h.assetType}
                       </span>
                     </div>
@@ -134,7 +135,7 @@ async function InstitutionDetail({ id }: { id: string }) {
                       })}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex shrink-0 items-center gap-1">
                     <div className="text-right">
                       {h.value != null ? (
                         <>
@@ -218,12 +219,12 @@ async function InstitutionDetail({ id }: { id: string }) {
                   key={r.id}
                   className="flex items-center justify-between rounded-xl px-2 py-2.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]"
                 >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-[#172033] dark:text-white">
+                  <div className="min-w-0">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <p className="truncate text-sm font-medium text-[#172033] dark:text-white">
                         {r.name ?? r.categoryName}
                       </p>
-                      <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400">
+                      <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400">
                         {frequencyLabel[r.frequency]}
                       </span>
                     </div>
@@ -235,7 +236,7 @@ async function InstitutionDetail({ id }: { id: string }) {
                       })}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex shrink-0 items-center gap-1">
                     <span
                       className={
                         r.direction === "in"
@@ -271,11 +272,11 @@ async function InstitutionDetail({ id }: { id: string }) {
               key={t.id}
               className="flex items-center justify-between rounded-xl px-2 py-2.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]"
             >
-              <div>
-                <p className="text-sm font-medium text-[#172033] dark:text-white">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-[#172033] dark:text-white">
                   {t.name ?? t.categoryName}
                 </p>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
                   {t.categoryName} ·{" "}
                   {parseDateOnly(t.date).toLocaleDateString(undefined, {
                     month: "short",
@@ -284,7 +285,7 @@ async function InstitutionDetail({ id }: { id: string }) {
                   })}
                 </p>
               </div>
-              <div className="flex items-center gap-1">
+              <div className="flex shrink-0 items-center gap-1">
                 <span
                   className={
                     t.direction === "in"
@@ -314,7 +315,7 @@ export default async function InstitutionDetailPage({
   return (
     <div className="relative flex min-h-screen bg-zinc-50 dark:bg-[#0c0c0e]">
       <div className="flex-1 px-6 py-10 md:px-10">
-        <Suspense>
+        <Suspense fallback={<PageLoading />}>
           <InstitutionDetail id={id} />
         </Suspense>
       </div>

@@ -7,6 +7,7 @@ import { StatsCharts } from "@/components/charts/stats-charts";
 import { CashFlowChart } from "@/components/charts/cash-flow-chart";
 import { InvestmentsChart } from "@/components/charts/investments-chart";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import { PageLoading } from "@/components/ui/spinner";
 
 function currency(n: number) {
   const sign = n < 0 ? "-" : "";
@@ -176,7 +177,7 @@ export default function StatsPage() {
   return (
     <div className="relative flex min-h-screen bg-zinc-50 dark:bg-[#0c0c0e]">
       <div className="flex-1 px-6 py-10 md:px-10">
-        <Suspense>
+        <Suspense fallback={<PageLoading />}>
           <StatsContent />
         </Suspense>
       </div>

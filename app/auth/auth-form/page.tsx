@@ -1,12 +1,17 @@
-// app/auth/page.tsx
-
 import { AuthForm } from "@/components/auth-form";
 
-export default function Page() {
+export default async function AuthFormPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string }>;
+}) {
+  const { mode } = await searchParams;
+  const initialMode = mode === "register" ? "register" : "login";
+
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+    <div className="flex min-h-screen items-center justify-center overflow-hidden bg-white p-6 dark:bg-[#0c0c0e]">
       <div className="w-full max-w-md">
-        <AuthForm />
+        <AuthForm initialMode={initialMode} />
       </div>
     </div>
   );

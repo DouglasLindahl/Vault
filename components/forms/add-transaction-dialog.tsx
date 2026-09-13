@@ -36,10 +36,7 @@ export function AddTransactionDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="secondary"
-          className="h-11 rounded-2xl border border-[#e5e2da] dark:border-white/[0.07]"
-        >
+        <Button className="h-11 rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600">
           <Plus className="mr-2 h-4 w-4" />
           Add transaction
         </Button>

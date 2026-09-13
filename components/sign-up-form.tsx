@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,6 +24,7 @@ export function SignUpForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -33,6 +35,11 @@ export function SignUpForm({
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setError("You need to agree to the Terms and Conditions");
       return;
     }
 
@@ -112,16 +119,48 @@ export function SignUpForm({
                 />
               </div>
 
+              <div className="flex items-start gap-2.5">
+                <Checkbox
+                  id="agree-to-terms"
+                  checked={agreedToTerms}
+                  onCheckedChange={(checked) =>
+                    setAgreedToTerms(checked === true)
+                  }
+                  className="mt-0.5"
+                />
+                <Label
+                  htmlFor="agree-to-terms"
+                  className="text-sm font-normal leading-snug"
+                >
+                  I agree to the{" "}
+                  <Link
+                    href="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium underline underline-offset-4"
+                  >
+                    Terms and Conditions
+                  </Link>
+                </Label>
+              </div>
+
               {error && <p className="text-sm text-red-500">{error}</p>}
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !agreedToTerms}
+              >
                 {isLoading ? "Creating account..." : "Sign up"}
               </Button>
             </div>
 
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
+              <Link
+                href="/auth/auth-form"
+                className="underline underline-offset-4"
+              >
                 Login
               </Link>
             </div>

@@ -104,7 +104,7 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="relative flex min-h-screen bg-zinc-50 dark:bg-[#0c0c0e]">
+    <div className="relative flex min-h-screen overflow-hidden bg-zinc-50 dark:bg-[#0c0c0e]">
       <div className="pointer-events-none absolute -inset-10 -z-10 rounded-[40px] bg-[radial-gradient(circle_at_top,rgba(49,92,255,0.08),transparent_45%)] blur-2xl dark:bg-[radial-gradient(circle_at_top,rgba(236,72,153,0.12),transparent_45%)]" />
 
       <div className="flex-1 px-6 py-10 md:px-10">
@@ -117,7 +117,7 @@ export default function Dashboard() {
               Dashboard
             </h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <AddTransactionDialog
               institutions={institutions}
               categories={allCategories}
@@ -260,15 +260,15 @@ export default function Dashboard() {
                 key={r.id}
                 className="flex items-center justify-between rounded-xl px-2 py-2.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]"
               >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400">
                     <Repeat className="h-4 w-4" />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#172033] dark:text-white">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-[#172033] dark:text-white">
                       {r.name ?? r.category}
                     </p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
                       {r.institutionName} · next{" "}
                       {r.next.toLocaleDateString(undefined, {
                         month: "short",
@@ -279,7 +279,7 @@ export default function Dashboard() {
                 </div>
                 <span
                   className={cn(
-                    "text-sm font-semibold tabular-nums",
+                    "shrink-0 text-sm font-semibold tabular-nums",
                     r.direction === "in"
                       ? "text-emerald-600 dark:text-emerald-400"
                       : "text-[#172033] dark:text-white",
@@ -310,10 +310,10 @@ export default function Dashboard() {
                 key={t.id}
                 className="flex items-center justify-between rounded-xl px-2 py-2.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <div
                     className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-full",
+                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
                       t.direction === "in"
                         ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                         : "bg-zinc-100 text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400",
@@ -325,11 +325,11 @@ export default function Dashboard() {
                       <ArrowDownRight className="h-4 w-4" />
                     )}
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-[#172033] dark:text-white">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-[#172033] dark:text-white">
                       {t.name ?? t.category}
                     </p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
                       {t.institutionName} ·{" "}
                       {parseDateOnly(t.date).toLocaleDateString(undefined, {
                         month: "short",
@@ -340,7 +340,7 @@ export default function Dashboard() {
                 </div>
                 <span
                   className={cn(
-                    "text-sm font-semibold tabular-nums",
+                    "shrink-0 text-sm font-semibold tabular-nums",
                     t.direction === "in"
                       ? "text-emerald-600 dark:text-emerald-400"
                       : "text-[#172033] dark:text-white",
