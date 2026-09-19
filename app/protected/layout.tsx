@@ -9,7 +9,7 @@ import { runRecurringDueCheck } from "@/lib/due-check";
 import { isAdminEmail } from "@/lib/admin";
 import { DashboardProvider } from "@/app/protected/dashboard/dashboard-provider";
 import { DashboardNav } from "@/components/nav/dashboard-nav";
-import { PendingAmountBanner } from "@/components/recurring/pending-amount-banner";
+import { PendingAmountDialog } from "@/components/recurring/pending-amount-dialog";
 import { PageLoading } from "@/components/ui/spinner";
 import type {
   DashboardData,
@@ -96,7 +96,7 @@ async function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <DashboardProvider data={data}>
       <DashboardNav />
-      <PendingAmountBanner />
+      <PendingAmountDialog />
       {children}
     </DashboardProvider>
   );

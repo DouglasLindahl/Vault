@@ -38,7 +38,10 @@ function mapWithRelations(row: any): RecurringTransactionWithRelations {
     tags: (recurring_transaction_tags ?? [])
       .map((jt: any) => jt.tags)
       .filter(Boolean),
-    institutionName: institutions?.name ?? "Unknown",
+    // institutions.name is encrypted too — the joined value here is raw
+    // ciphertext unless decrypted, same bug already fixed in
+    // lib/queries/recurring-transaction-pending.ts.
+    institutionName: institutions?.name ? (decryptNullable(institutions.name) as string) : "Unknown",
   };
 }
 

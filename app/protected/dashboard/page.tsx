@@ -277,7 +277,7 @@ export default function Dashboard() {
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-foreground dark:text-white">
-                      {r.name ?? r.institutionName}
+                      {r.name ?? (r.direction === "in" ? "Income" : "Expense")}
                     </p>
                     <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
                       {r.institutionName} · next{" "}

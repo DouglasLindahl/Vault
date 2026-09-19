@@ -90,7 +90,7 @@ function RecurringRow({ r }: { r: RecurringTransactionWithRelations }) {
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-2">
           <p className="truncate text-sm font-medium text-foreground dark:text-white">
-            {r.name ?? r.institutionName}
+            {r.name ?? (r.direction === "in" ? "Income" : "Expense")}
           </p>
           <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400">
             {frequencyLabel[r.frequency]}

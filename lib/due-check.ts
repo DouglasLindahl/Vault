@@ -42,7 +42,7 @@ export async function runRecurringDueCheck(
         await createNotification(supabase, {
           user_id: userId,
           type: "recurring_amount_needed",
-          title: `${r.name ?? r.institutionName} was due ${date} — enter the amount`,
+          title: `${r.name ?? (r.direction === "in" ? "Income" : "Expense")} was due ${date} — enter the amount`,
           body: "This recurring transaction's amount varies each time — let us know what it actually was.",
           link: "/protected/dashboard/recurring-transactions",
         });
