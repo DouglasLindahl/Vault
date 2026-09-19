@@ -30,7 +30,7 @@ export function LogoutButton({ className }: { className?: string }) {
       variant="ghost"
       size="sm"
       className={cn(
-        "shrink-0 gap-2 rounded-xl text-zinc-500 hover:bg-zinc-100 hover:text-[#172033] dark:text-zinc-400 dark:hover:bg-white/[0.06] dark:hover:text-white",
+        "shrink-0 gap-2 rounded-xl text-zinc-500 hover:bg-zinc-100 hover:text-foreground dark:text-zinc-400 dark:hover:bg-white/[0.06] dark:hover:text-white",
         className,
       )}
     >

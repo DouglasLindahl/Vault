@@ -1,5 +1,5 @@
 export * from "./institutions";
-export * from "./categories";
+export * from "./tags";
 export * from "./recurring-transactions";
 export * from "./transactions";
 export * from "./investments";

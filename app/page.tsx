@@ -18,7 +18,7 @@ const features = [
   },
   {
     icon: PiggyBank,
-    title: "Spending by category",
+    title: "Spending by tag",
     description:
       "See exactly where your money goes each week, month, or year — groceries, bills, whatever matters to you.",
   },
@@ -32,7 +32,7 @@ const features = [
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-white dark:bg-[#0c0c0e]">
+    <div className="relative min-h-screen overflow-hidden bg-background">
       <div className="pointer-events-none absolute -inset-10 -z-10 rounded-[40px] bg-[radial-gradient(circle_at_top,rgba(49,92,255,0.10),transparent_45%)] blur-2xl dark:bg-[radial-gradient(circle_at_top,rgba(236,72,153,0.16),transparent_45%)]" />
 
       {/* Nav */}
@@ -43,7 +43,7 @@ export default function LandingPage() {
             alt="Vault"
             className="h-9 w-9 rounded-2xl object-contain"
           />
-          <span className="text-base font-bold tracking-tight text-[#172033] dark:text-white">
+          <span className="text-base font-bold tracking-tight text-foreground dark:text-white">
             Vault
           </span>
         </div>
@@ -51,13 +51,13 @@ export default function LandingPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/auth/auth-form?mode=login"
-            className="text-sm font-medium text-zinc-500 hover:text-[#172033] dark:hover:text-white"
+            className="text-sm font-medium text-zinc-500 hover:text-foreground dark:hover:text-white"
           >
             Log in
           </Link>
           <Link
             href="/auth/auth-form?mode=register"
-            className="flex h-10 items-center rounded-2xl bg-[#172033] px-4 text-sm font-semibold text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
+            className="flex h-10 items-center rounded-2xl bg-primary-surface px-4 text-sm font-semibold text-white"
           >
             Get started
           </Link>
@@ -66,10 +66,10 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="mx-auto max-w-3xl px-6 pb-20 pt-16 text-center sm:pt-24">
-        <p className="text-sm font-semibold tracking-wide text-[#315cff] dark:text-pink-400">
+        <p className="text-sm font-semibold tracking-wide text-accent dark:text-pink-400">
           VAULT
         </p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight text-[#172033] sm:text-5xl dark:text-white">
+        <h1 className="mt-3 text-4xl font-bold tracking-tight text-foreground sm:text-5xl dark:text-white">
           Your money, clearer.
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-base text-zinc-500 dark:text-zinc-400">
@@ -80,14 +80,14 @@ export default function LandingPage() {
         <div className="mt-8 flex items-center justify-center gap-3">
           <Link
             href="/auth/auth-form?mode=register"
-            className="group flex h-12 items-center rounded-2xl bg-[#172033] px-6 text-sm font-semibold text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
+            className="group flex h-12 items-center rounded-2xl bg-primary-surface px-6 text-sm font-semibold text-white"
           >
             Create your account
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
           <Link
             href="/auth/auth-form?mode=login"
-            className="flex h-12 items-center rounded-2xl border border-[#e5e2da] px-6 text-sm font-semibold text-[#172033] dark:border-white/[0.1] dark:text-white"
+            className="flex h-12 items-center rounded-2xl border border-border px-6 text-sm font-semibold text-foreground dark:text-white"
           >
             Log in
           </Link>
@@ -100,12 +100,12 @@ export default function LandingPage() {
           {features.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="rounded-[28px] border border-[#e5e2da] bg-white/95 p-6 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95"
+              className="rounded-[28px] border border-border bg-card/95 p-6 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur"
             >
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-[#315cff]/10 text-[#315cff] dark:bg-white/[0.06] dark:text-pink-400">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-accent/10 text-accent">
                 <Icon className="h-5 w-5" />
               </div>
-              <h3 className="text-base font-semibold text-[#172033] dark:text-white">
+              <h3 className="text-base font-semibold text-foreground dark:text-white">
                 {title}
               </h3>
               <p className="mt-1.5 text-sm text-zinc-500 dark:text-zinc-400">
@@ -118,18 +118,18 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="mx-auto max-w-5xl px-6 pb-10">
-        <div className="flex flex-col items-center justify-between gap-4 border-t border-[#e5e2da] pt-6 text-sm text-zinc-500 sm:flex-row dark:border-white/[0.07] dark:text-zinc-400">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-border pt-6 text-sm text-zinc-500 sm:flex-row dark:text-zinc-400">
           <p>Vault</p>
           <div className="flex items-center gap-4">
             <Link
               href="/auth/auth-form?mode=login"
-              className="hover:text-[#172033] dark:hover:text-white"
+              className="hover:text-foreground dark:hover:text-white"
             >
               Log in
             </Link>
             <Link
               href="/auth/auth-form?mode=register"
-              className="hover:text-[#172033] dark:hover:text-white"
+              className="hover:text-foreground dark:hover:text-white"
             >
               Create account
             </Link>

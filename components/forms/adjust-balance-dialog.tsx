@@ -36,15 +36,15 @@ export function AdjustBalanceDialog({
       <DialogTrigger asChild>
         <button
           type="button"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-50 hover:text-[#315cff] dark:hover:bg-white/[0.04] dark:hover:text-pink-400"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-50 hover:text-accent dark:hover:bg-white/[0.04] dark:hover:text-pink-400"
           aria-label={`Adjust balance for ${institutionName}`}
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm rounded-[28px] border-[#e5e2da] dark:border-white/[0.07]">
+      <DialogContent className="max-w-sm rounded-[28px] border-border">
         <DialogHeader>
-          <DialogTitle className="text-xl text-[#172033] dark:text-white">
+          <DialogTitle className="text-xl text-foreground dark:text-white">
             Adjust {institutionName}
           </DialogTitle>
           <DialogDescription>

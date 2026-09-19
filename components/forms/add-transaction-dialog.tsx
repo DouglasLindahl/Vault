@@ -14,16 +14,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { AddTransactionForm } from "@/components/forms/add-transaction-form";
+import type { TagOption } from "@/lib/types";
 
 type InstitutionOption = { id: string; name: string };
-type CategoryOption = { id: string; name: string };
 
 export function AddTransactionDialog({
   institutions,
-  categories,
+  tags,
 }: {
   institutions: InstitutionOption[];
-  categories: CategoryOption[];
+  tags: TagOption[];
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -36,14 +36,14 @@ export function AddTransactionDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="h-11 rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600">
+        <Button className="h-11 rounded-2xl bg-primary-surface text-white">
           <Plus className="mr-2 h-4 w-4" />
           Add transaction
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto rounded-[28px] border-[#e5e2da] dark:border-white/[0.07]">
+      <DialogContent className="max-h-[85vh] max-w-xl overflow-y-auto rounded-[28px] border-border">
         <DialogHeader>
-          <DialogTitle className="text-xl text-[#172033] dark:text-white">
+          <DialogTitle className="text-xl text-foreground dark:text-white">
             Add transaction
           </DialogTitle>
           <DialogDescription>
@@ -52,7 +52,7 @@ export function AddTransactionDialog({
         </DialogHeader>
         <AddTransactionForm
           institutions={institutions}
-          categories={categories}
+          tags={tags}
           onSuccess={handleSuccess}
         />
       </DialogContent>

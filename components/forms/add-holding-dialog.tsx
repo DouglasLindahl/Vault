@@ -29,15 +29,15 @@ export function AddHoldingDialog({ institutionId }: { institutionId: string }) {
       <DialogTrigger asChild>
         <Button
           variant="secondary"
-          className="h-9 rounded-xl border border-[#e5e2da] dark:border-white/[0.07]"
+          className="h-9 rounded-xl border border-border"
         >
           <Plus className="mr-2 h-4 w-4" />
           Add holding
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-xl rounded-[28px] border-[#e5e2da] dark:border-white/[0.07]">
+      <DialogContent className="max-w-xl rounded-[28px] border-border">
         <DialogHeader>
-          <DialogTitle className="text-xl text-[#172033] dark:text-white">
+          <DialogTitle className="text-xl text-foreground dark:text-white">
             Add holding
           </DialogTitle>
           <DialogDescription>

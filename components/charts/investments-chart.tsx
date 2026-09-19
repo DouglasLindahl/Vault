@@ -31,27 +31,27 @@ export function InvestmentsChart({
   return (
     <div className="grid grid-cols-1 gap-6">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
+        <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
           <CardHeader className="pb-2">
             <CardDescription>Total invested</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold tabular-nums text-[#172033] dark:text-white">
+            <p className="text-2xl font-bold tabular-nums text-foreground dark:text-white">
               {currency(totalInvested)}
             </p>
           </CardContent>
         </Card>
-        <Card className="rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
+        <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
           <CardHeader className="pb-2">
             <CardDescription>Current value</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold tabular-nums text-[#172033] dark:text-white">
+            <p className="text-2xl font-bold tabular-nums text-foreground dark:text-white">
               {currency(totalValue)}
             </p>
           </CardContent>
         </Card>
-        <Card className="rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
+        <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
           <CardHeader className="pb-2">
             <CardDescription>Gain / loss</CardDescription>
           </CardHeader>
@@ -59,8 +59,8 @@ export function InvestmentsChart({
             <p
               className={
                 gain >= 0
-                  ? "text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400"
-                  : "text-2xl font-bold tabular-nums text-[#172033] dark:text-white"
+                  ? "text-2xl font-bold tabular-nums text-success"
+                  : "text-2xl font-bold tabular-nums text-foreground dark:text-white"
               }
             >
               {gain >= 0 ? "+" : ""}
@@ -71,9 +71,9 @@ export function InvestmentsChart({
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card className="rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
+        <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
           <CardHeader>
-            <CardTitle className="text-base text-[#172033] dark:text-white">
+            <CardTitle className="text-base text-foreground dark:text-white">
               Value by asset
             </CardTitle>
           </CardHeader>
@@ -115,9 +115,9 @@ export function InvestmentsChart({
           </CardContent>
         </Card>
 
-        <Card className="rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
+        <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
           <CardHeader>
-            <CardTitle className="text-base text-[#172033] dark:text-white">
+            <CardTitle className="text-base text-foreground dark:text-white">
               Total invested over time
             </CardTitle>
           </CardHeader>

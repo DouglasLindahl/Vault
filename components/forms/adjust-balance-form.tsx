@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { updateInstitution } from "@/lib/queries/institutions";
+import { updateInstitutionBalanceAction } from "@/lib/actions/institutions";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,12 +33,9 @@ export function AdjustBalanceForm({
     }
 
     setIsLoading(true);
-    const supabase = createClient();
 
     try {
-      await updateInstitution(supabase, institutionId, {
-        current_balance: Number(balance),
-      });
+      await updateInstitutionBalanceAction(institutionId, Number(balance));
 
       if (onSuccess) {
         onSuccess();
@@ -76,7 +72,7 @@ export function AdjustBalanceForm({
       <Button
         type="submit"
         disabled={isLoading}
-        className="h-12 rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
+        className="h-12 rounded-2xl bg-primary-surface text-white"
       >
         {isLoading ? "Saving..." : "Save balance"}
       </Button>

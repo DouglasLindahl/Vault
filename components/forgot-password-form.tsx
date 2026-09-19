@@ -31,7 +31,6 @@ export function ForgotPasswordForm({
     setError(null);
 
     try {
-      // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/update-password`,
       });
@@ -47,53 +46,66 @@ export function ForgotPasswordForm({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       {success ? (
-        <Card>
+        <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.08)] backdrop-blur">
           <CardHeader>
-            <CardTitle className="text-2xl">Check Your Email</CardTitle>
+            <CardTitle className="text-xl text-foreground dark:text-white">
+              Check your email
+            </CardTitle>
             <CardDescription>Password reset instructions sent</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              If you registered using your email and password, you will receive
-              a password reset email.
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              If you registered using your email and password, you&apos;ll
+              receive a password reset email shortly.
             </p>
           </CardContent>
         </Card>
       ) : (
-        <Card>
+        <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.08)] backdrop-blur">
           <CardHeader>
-            <CardTitle className="text-2xl">Reset Your Password</CardTitle>
+            <CardTitle className="text-xl text-foreground dark:text-white">
+              Reset your password
+            </CardTitle>
             <CardDescription>
-              Type in your email and we&apos;ll send you a link to reset your
-              password
+              Enter your email and we&apos;ll send you a link to reset your
+              password.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleForgotPassword}>
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-5">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder="you@example.com"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="h-12 rounded-2xl"
                   />
                 </div>
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                {error && (
+                  <div className="rounded-2xl bg-red-500/[0.07] px-4 py-3 text-sm text-red-600 dark:text-red-400">
+                    {error}
+                  </div>
+                )}
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="h-12 rounded-2xl bg-primary-surface text-white"
+                >
                   {isLoading ? "Sending..." : "Send reset email"}
                 </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
-                Already have an account?{" "}
+              <div className="mt-5 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                Remembered it?{" "}
                 <Link
                   href="/auth/auth-form"
-                  className="underline underline-offset-4"
+                  className="font-medium text-foreground underline underline-offset-4 dark:text-white"
                 >
-                  Login
+                  Log in
                 </Link>
               </div>
             </form>

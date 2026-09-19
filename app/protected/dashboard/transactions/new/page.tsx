@@ -1,20 +1,18 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getInstitutions } from "@/lib/queries/institutions";
-import { getCategories } from "@/lib/queries/categories";
+import { getTags } from "@/lib/queries/tags";
 import { AddTransactionForm } from "@/components/forms/add-transaction-form";
 import { PageLoading } from "@/components/ui/spinner";
 
 async function NewTransactionForm() {
   const supabase = await createClient();
-  const [institutions, categories] = await Promise.all([
+  const [institutions, tags] = await Promise.all([
     getInstitutions(supabase),
-    getCategories(supabase),
+    getTags(supabase),
   ]);
 
-  return (
-    <AddTransactionForm institutions={institutions} categories={categories} />
-  );
+  return <AddTransactionForm institutions={institutions} tags={tags} />;
 }
 
 export default function NewTransactionPage() {

@@ -37,24 +37,23 @@ export type InstitutionUpdate = Partial<
 >;
 
 // ---------------------------------------------------
-// categories
+// tags
 // ---------------------------------------------------
-export type CategoryType = "income" | "expense";
-
-export type Category = {
+export type Tag = {
   id: string;
   user_id: string;
   name: string;
-  type: CategoryType;
+  color: string;
+  created_at: string;
 };
 
-export type CategoryInsert = {
+export type TagInsert = {
   user_id: string;
   name: string;
-  type: CategoryType;
+  color?: string;
 };
 
-export type CategoryUpdate = Partial<Omit<CategoryInsert, "user_id">>;
+export type TagUpdate = Partial<Omit<TagInsert, "user_id">>;
 
 // ---------------------------------------------------
 // recurring_transactions
@@ -63,7 +62,6 @@ export type RecurringTransaction = {
   id: string;
   user_id: string;
   institution_id: string;
-  category_id: string;
   name: string | null;
   amount: number;
   direction: Direction;
@@ -77,7 +75,6 @@ export type RecurringTransaction = {
 export type RecurringTransactionInsert = {
   user_id: string;
   institution_id: string;
-  category_id: string;
   name?: string | null;
   amount: number;
   direction: Direction;
@@ -87,9 +84,9 @@ export type RecurringTransactionInsert = {
   active?: boolean;
 };
 
-// Recurring transaction joined with its category + institution name.
+// Recurring transaction joined with its tags + institution name.
 export type RecurringTransactionWithRelations = RecurringTransaction & {
-  categoryName: string;
+  tags: Tag[];
   institutionName: string;
 };
 
@@ -104,7 +101,6 @@ export type Transaction = {
   id: string;
   user_id: string;
   institution_id: string;
-  category_id: string;
   recurring_transaction_id: string | null;
   name: string | null;
   amount: number;
@@ -117,7 +113,6 @@ export type Transaction = {
 export type TransactionInsert = {
   user_id: string;
   institution_id: string;
-  category_id: string;
   recurring_transaction_id?: string | null;
   name?: string | null;
   amount: number;
@@ -128,10 +123,10 @@ export type TransactionInsert = {
 
 export type TransactionUpdate = Partial<Omit<TransactionInsert, "user_id">>;
 
-// Transaction joined with its category + institution name — the
+// Transaction joined with its tags + institution name — the
 // shape most UI components actually want to render.
 export type TransactionWithRelations = Transaction & {
-  categoryName: string;
+  tags: Tag[];
   institutionName: string;
 };
 
@@ -207,13 +202,75 @@ export type DailySnapshotInsert = {
 };
 
 // ---------------------------------------------------
+// recurring_transaction_pending
+// ---------------------------------------------------
+export type PendingStatus = "pending" | "completed" | "skipped";
+
+export type RecurringTransactionPending = {
+  id: string;
+  user_id: string;
+  recurring_transaction_id: string;
+  due_date: string; // date
+  status: PendingStatus;
+  transaction_id: string | null;
+  created_at: string;
+  resolved_at: string | null;
+};
+
+export type RecurringTransactionPendingInsert = {
+  user_id: string;
+  recurring_transaction_id: string;
+  due_date: string;
+  status?: PendingStatus;
+};
+
+// Pending entry joined with enough of its parent recurring transaction to
+// render a prompt without a second round trip.
+export type RecurringTransactionPendingWithRelations = RecurringTransactionPending & {
+  name: string | null;
+  institutionName: string;
+  institutionId: string;
+  direction: Direction;
+};
+
+// ---------------------------------------------------
+// notifications
+// ---------------------------------------------------
+export type Notification = {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read: boolean;
+  created_at: string;
+};
+
+export type NotificationInsert = {
+  user_id: string;
+  type: string;
+  title: string;
+  body?: string | null;
+  link?: string | null;
+  read?: boolean;
+};
+
+// ---------------------------------------------------
 // profiles
 // ---------------------------------------------------
+export type SubscriptionStatus = "free" | "trial" | "active" | "canceled";
+
 export type Profile = {
   id: string;
   email: string | null;
   display_name: string | null;
   currency: string;
+  phone_number: string | null;
+  avatar_url: string | null;
+  date_of_birth: string | null;
+  timezone: string | null;
+  subscription_status: SubscriptionStatus;
   created_at: string;
 };
 

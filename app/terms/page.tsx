@@ -6,15 +6,15 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="mx-auto min-h-screen max-w-2xl px-6 py-12 bg-white dark:bg-[#0c0c0e]">
+    <div className="mx-auto min-h-screen max-w-2xl px-6 py-12 bg-background">
       <Link
         href="/"
-        className="text-sm text-zinc-500 hover:text-[#172033] dark:hover:text-white"
+        className="text-sm text-zinc-500 hover:text-foreground dark:hover:text-white"
       >
         ← Back
       </Link>
 
-      <h1 className="mt-6 text-2xl font-bold tracking-tight text-[#172033] dark:text-white">
+      <h1 className="mt-6 text-2xl font-bold tracking-tight text-foreground dark:text-white">
         Terms and Conditions
       </h1>
       <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
@@ -23,7 +23,7 @@ export default function TermsPage() {
 
       <div className="mt-8 flex flex-col gap-6 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
         <section>
-          <h2 className="mb-2 text-base font-semibold text-[#172033] dark:text-white">
+          <h2 className="mb-2 text-base font-semibold text-foreground dark:text-white">
             1. Acceptance of terms
           </h2>
           <p>
@@ -34,7 +34,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 text-base font-semibold text-[#172033] dark:text-white">
+          <h2 className="mb-2 text-base font-semibold text-foreground dark:text-white">
             2. Your data
           </h2>
           <p>
@@ -46,7 +46,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 text-base font-semibold text-[#172033] dark:text-white">
+          <h2 className="mb-2 text-base font-semibold text-foreground dark:text-white">
             3. Account responsibility
           </h2>
           <p>
@@ -56,7 +56,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 text-base font-semibold text-[#172033] dark:text-white">
+          <h2 className="mb-2 text-base font-semibold text-foreground dark:text-white">
             4. No financial advice
           </h2>
           <p>
@@ -66,7 +66,7 @@ export default function TermsPage() {
         </section>
 
         <section>
-          <h2 className="mb-2 text-base font-semibold text-[#172033] dark:text-white">
+          <h2 className="mb-2 text-base font-semibold text-foreground dark:text-white">
             5. Changes
           </h2>
           <p>

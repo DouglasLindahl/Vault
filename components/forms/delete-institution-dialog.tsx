@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
-import { createClient } from "@/lib/supabase/client";
-import { deleteInstitution } from "@/lib/queries/institutions";
+import { deleteInstitutionAction } from "@/lib/actions/institutions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,8 +32,7 @@ export function DeleteInstitutionDialog({
     setIsDeleting(true);
     setError(null);
     try {
-      const supabase = createClient();
-      await deleteInstitution(supabase, institutionId);
+      await deleteInstitutionAction(institutionId);
       setOpen(false);
       router.push("/protected/dashboard");
       router.refresh();
@@ -62,9 +60,9 @@ export function DeleteInstitutionDialog({
           <Trash2 className="h-3.5 w-3.5" />
         </button>
       </DialogTrigger>
-      <DialogContent className="max-w-sm rounded-[28px] border-[#e5e2da] dark:border-white/[0.07]">
+      <DialogContent className="max-w-sm rounded-[28px] border-border">
         <DialogHeader>
-          <DialogTitle className="text-xl text-[#172033] dark:text-white">
+          <DialogTitle className="text-xl text-foreground dark:text-white">
             Delete {institutionName}?
           </DialogTitle>
           <DialogDescription>

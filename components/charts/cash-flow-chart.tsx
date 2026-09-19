@@ -39,7 +39,7 @@ function GranularityToggle({
           className={cn(
             "rounded-lg px-2.5 py-1 text-xs font-medium transition-all",
             value === g.value
-              ? "bg-white text-[#172033] shadow-sm dark:bg-white/[0.1] dark:text-white"
+              ? "bg-white text-foreground shadow-sm dark:bg-white/[0.1] dark:text-white"
               : "text-zinc-500",
           )}
         >
@@ -79,10 +79,10 @@ export function CashFlowChart({
 
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <Card className="rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
+      <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
-            <CardTitle className="text-base text-[#172033] dark:text-white">
+            <CardTitle className="text-base text-foreground dark:text-white">
               Income
             </CardTitle>
             <CardDescription>
@@ -134,10 +134,10 @@ export function CashFlowChart({
         </CardContent>
       </Card>
 
-      <Card className="rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
+      <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
-            <CardTitle className="text-base text-[#172033] dark:text-white">
+            <CardTitle className="text-base text-foreground dark:text-white">
               Spending
             </CardTitle>
             <CardDescription>

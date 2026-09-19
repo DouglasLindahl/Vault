@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { createTransaction } from "@/lib/queries/transactions";
-import { createRecurringTransaction } from "@/lib/queries/recurring-transactions";
+import { createTransactionAction } from "@/lib/actions/transactions";
+import { createRecurringTransactionAction } from "@/lib/actions/recurring-transactions";
+import { createTag } from "@/lib/queries/tags";
 import type { Direction, Frequency } from "@/lib/types/database";
+import type { TagOption } from "@/lib/types";
 import { cn, todayDateOnly } from "@/lib/utils";
 
 type InstitutionOption = { id: string; name: string };
-type CategoryOption = { id: string; name: string };
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,66 +23,74 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TagPicker } from "@/components/forms/tag-picker";
 
 export function AddTransactionForm({
   institutions,
-  categories,
+  tags,
   onSuccess,
 }: {
   institutions: InstitutionOption[];
-  categories: CategoryOption[];
+  tags: TagOption[];
   onSuccess?: () => void;
 }) {
   const router = useRouter();
 
   const [institutionId, setInstitutionId] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const [availableTags, setAvailableTags] = useState<TagOption[]>(tags);
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const [name, setName] = useState("");
   const [direction, setDirection] = useState<Direction>("out");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(todayDateOnly());
   const [recurring, setRecurring] = useState(false);
   const [frequency, setFrequency] = useState<Frequency>("monthly");
+  const [isEstimate, setIsEstimate] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  async function handleCreateTag({ name, color }: { name: string; color: string }) {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("You need to be logged in.");
+
+    const tag = await createTag(supabase, { user_id: user.id, name, color });
+    const option: TagOption = { id: tag.id, name: tag.name, color: tag.color };
+    setAvailableTags((prev) => [...prev, option]);
+    return option;
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
 
     if (!institutionId) return setError("Pick an institution.");
-    if (!categoryId) return setError("Pick a category.");
     if (!amount || Number(amount) <= 0) return setError("Enter an amount greater than zero.");
 
     setIsLoading(true);
-    const supabase = createClient();
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("You need to be logged in.");
-
       if (recurring) {
-        await createRecurringTransaction(supabase, {
-          user_id: user.id,
-          institution_id: institutionId,
-          category_id: categoryId,
+        await createRecurringTransactionAction({
+          institutionId,
           name: name.trim() || null,
           amount: Number(amount),
           direction,
           frequency,
-          start_date: date,
+          startDate: date,
+          isEstimate,
+          tagIds,
         });
       } else {
-        await createTransaction(supabase, {
-          user_id: user.id,
-          institution_id: institutionId,
-          category_id: categoryId,
+        await createTransactionAction({
+          institutionId,
           name: name.trim() || null,
           amount: Number(amount),
           direction,
           date,
+          tagIds,
         });
       }
 
@@ -118,19 +127,13 @@ export function AddTransactionForm({
             </div>
 
             <div className="grid gap-2">
-              <Label>Category</Label>
-              <Select value={categoryId} onValueChange={setCategoryId}>
-                <SelectTrigger className="h-11 rounded-2xl">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Tags</Label>
+              <TagPicker
+                tags={availableTags}
+                selectedIds={tagIds}
+                onChange={setTagIds}
+                onCreateTag={handleCreateTag}
+              />
             </div>
           </div>
 
@@ -209,9 +212,9 @@ export function AddTransactionForm({
             )}
           </div>
 
-          <div className="flex items-center justify-between rounded-2xl border border-[#e5e2da] px-4 py-3 dark:border-white/[0.07]">
+          <div className="flex items-center justify-between rounded-2xl border border-border px-4 py-3">
             <div>
-              <p className="text-sm font-medium text-[#172033] dark:text-white">
+              <p className="text-sm font-medium text-foreground dark:text-white">
                 Recurring
               </p>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -220,6 +223,20 @@ export function AddTransactionForm({
             </div>
             <Switch checked={recurring} onCheckedChange={setRecurring} />
           </div>
+
+          {recurring && (
+            <div className="flex items-center justify-between rounded-2xl border border-border px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-foreground dark:text-white">
+                  Amount varies each time
+                </p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  You&apos;ll be prompted to enter the actual amount whenever this comes due.
+                </p>
+              </div>
+              <Switch checked={isEstimate} onCheckedChange={setIsEstimate} />
+            </div>
+          )}
 
           {error && (
             <div className="rounded-2xl bg-red-500/[0.07] px-4 py-3 text-sm text-red-600 dark:text-red-400">
@@ -230,7 +247,7 @@ export function AddTransactionForm({
           <Button
             type="submit"
             disabled={isLoading}
-            className="h-12 rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
+            className="h-12 rounded-2xl bg-primary-surface text-white"
           >
             {isLoading ? "Saving..." : recurring ? "Save recurring transaction" : "Save transaction"}
           </Button>

@@ -272,7 +272,7 @@ export function AddHoldingForm({
       <Button
         type="submit"
         disabled={isLoading}
-        className="h-12 rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
+        className="h-12 rounded-2xl bg-primary-surface text-white"
       >
         {isLoading ? "Saving..." : "Save holding"}
       </Button>

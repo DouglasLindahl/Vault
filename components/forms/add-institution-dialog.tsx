@@ -14,8 +14,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { AddInstitutionForm } from "@/components/forms/add-institution-form";
+import { cn } from "@/lib/utils";
 
-export function AddInstitutionDialog() {
+export function AddInstitutionDialog({
+  triggerClassName,
+}: {
+  triggerClassName?: string;
+}) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
@@ -30,15 +35,18 @@ export function AddInstitutionDialog() {
         <Button
           variant="ghost"
           size="sm"
-          className="h-9 rounded-xl border border-[#e5e2da] text-zinc-500 dark:border-white/[0.07] dark:text-zinc-400"
+          className={cn(
+            "h-9 rounded-xl border border-border text-zinc-500 dark:text-zinc-400",
+            triggerClassName,
+          )}
         >
           <Plus className="mr-2 h-4 w-4" />
           Add institution
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto rounded-[28px] border-[#e5e2da] dark:border-white/[0.07]">
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto rounded-[28px] border-border">
         <DialogHeader>
-          <DialogTitle className="text-xl text-[#172033] dark:text-white">
+          <DialogTitle className="text-xl text-foreground dark:text-white">
             Add institution
           </DialogTitle>
           <DialogDescription>Name it and set a starting balance.</DialogDescription>

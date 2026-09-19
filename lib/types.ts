@@ -5,16 +5,16 @@ export type Institution = {
   balance: number;
 };
 
-export type CategoryOption = {
+export type TagOption = {
   id: string;
   name: string;
-  type: "income" | "expense";
+  color: string;
 };
 
 export type Transaction = {
   id: string;
   name: string | null;
-  category: string;
+  tags: TagOption[];
   institutionName: string;
   amount: number;
   direction: "in" | "out";
@@ -24,7 +24,7 @@ export type Transaction = {
 export type RecurringTransaction = {
   id: string;
   name: string | null;
-  category: string;
+  tags: TagOption[];
   institutionName: string;
   amount: number;
   direction: "in" | "out";
@@ -36,5 +36,6 @@ export type DashboardData = {
   institutions: Institution[];
   transactions: Transaction[];
   recurringTransactions: RecurringTransaction[];
-  categories: CategoryOption[];
+  tags: TagOption[];
+  isAdmin: boolean;
 };

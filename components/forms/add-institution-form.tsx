@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { createInstitution } from "@/lib/queries/institutions";
+import { createInstitutionAction } from "@/lib/actions/institutions";
 import type { InstitutionType } from "@/lib/types/database";
 
 import { Button } from "@/components/ui/button";
@@ -36,19 +35,12 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
     }
 
     setIsLoading(true);
-    const supabase = createClient();
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("You need to be logged in.");
-
-      await createInstitution(supabase, {
-        user_id: user.id,
+      await createInstitutionAction({
         name: name.trim(),
         type,
-        starting_balance: startingBalance ? Number(startingBalance) : 0,
+        startingBalance: startingBalance ? Number(startingBalance) : 0,
       });
 
       if (onSuccess) {
@@ -113,7 +105,7 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
       <Button
         type="submit"
         disabled={isLoading}
-        className="h-12 rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
+        className="h-12 rounded-2xl bg-primary-surface text-white"
       >
         {isLoading ? "Saving..." : "Save institution"}
       </Button>

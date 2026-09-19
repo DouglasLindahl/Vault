@@ -20,8 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import { createClient } from "@/lib/supabase/client";
-import { reorderInstitutions } from "@/lib/queries/institutions";
+import { reorderInstitutionsAction } from "@/lib/actions/institutions";
 import type { Institution } from "@/lib/types";
 
 function currency(n: number) {
@@ -68,7 +67,7 @@ function SortableAccountRow({ account }: { account: Institution }) {
           href={`/protected/dashboard/institutions/${account.id}`}
           className="flex min-w-0 items-center gap-2.5"
         >
-          <span className="truncate text-sm font-medium text-[#172033] dark:text-white">
+          <span className="truncate text-sm font-medium text-foreground dark:text-white">
             {account.name}
           </span>
           <span className="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400">
@@ -77,12 +76,12 @@ function SortableAccountRow({ account }: { account: Institution }) {
         </Link>
       </div>
       <div className="flex shrink-0 items-center gap-1">
-        <span className="text-sm font-semibold tabular-nums text-[#172033] dark:text-white">
+        <span className="text-sm font-semibold tabular-nums text-foreground dark:text-white">
           {currency(account.balance)}
         </span>
         <Link
           href={`/protected/dashboard/institutions/${account.id}`}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-50 hover:text-[#315cff] dark:hover:bg-white/[0.04] dark:hover:text-pink-400"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-50 hover:text-accent dark:hover:bg-white/[0.04] dark:hover:text-pink-400"
           aria-label={`View ${account.name}`}
         >
           <Pencil className="h-3.5 w-3.5" />
@@ -119,11 +118,7 @@ export function SortableAccountsList({
     const reordered = arrayMove(items, oldIndex, newIndex);
     setItems(reordered);
 
-    const supabase = createClient();
-    await reorderInstitutions(
-      supabase,
-      reordered.map((a) => a.id),
-    );
+    await reorderInstitutionsAction(reordered.map((a) => a.id));
     router.refresh();
   }
 

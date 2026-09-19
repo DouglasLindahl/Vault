@@ -116,11 +116,11 @@ export function AuthForm({
           className="mx-auto mb-4 h-11 w-11 rounded-2xl object-contain"
         />
 
-        <p className="text-sm font-semibold tracking-wide text-[#315cff] dark:text-pink-400">
+        <p className="text-sm font-semibold tracking-wide text-accent dark:text-pink-400">
           VAULT
         </p>
 
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-[#172033] dark:text-white">
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground dark:text-white">
           Your money, clearer.
         </h1>
 
@@ -137,8 +137,8 @@ export function AuthForm({
           className={cn(
             "rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
             mode === "login"
-              ? "bg-[#315cff] text-white shadow-sm dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
-              : "text-zinc-500 hover:text-[#172033] dark:hover:text-white",
+              ? "bg-primary-surface text-white shadow-sm"
+              : "text-zinc-500 hover:text-foreground dark:hover:text-white",
           )}
         >
           Login
@@ -150,8 +150,8 @@ export function AuthForm({
           className={cn(
             "rounded-xl px-4 py-2.5 text-sm font-semibold transition-all",
             mode === "register"
-              ? "bg-[#315cff] text-white shadow-sm dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
-              : "text-zinc-500 hover:text-[#172033] dark:hover:text-white",
+              ? "bg-primary-surface text-white shadow-sm"
+              : "text-zinc-500 hover:text-foreground dark:hover:text-white",
           )}
         >
           Register
@@ -159,9 +159,9 @@ export function AuthForm({
       </div>
 
       {/* FORM */}
-      <Card className="overflow-hidden rounded-[28px] border-[#e5e2da] bg-white/95 shadow-[0_18px_60px_rgba(23,32,51,0.08)] backdrop-blur dark:border-white/[0.07] dark:bg-[#141416]/95">
+      <Card className="overflow-hidden rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.08)] backdrop-blur">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl text-[#172033] dark:text-white">
+          <CardTitle className="text-xl text-foreground dark:text-white">
             {mode === "login" ? "Welcome back" : "Create your account"}
           </CardTitle>
 
@@ -255,7 +255,7 @@ export function AuthForm({
                       href="/terms"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-medium text-[#172033] underline underline-offset-4 dark:text-white"
+                      className="font-medium text-foreground underline underline-offset-4 dark:text-white"
                     >
                       Terms and Conditions
                     </a>
@@ -272,7 +272,7 @@ export function AuthForm({
               <Button
                 type="submit"
                 disabled={isLoading || (mode === "register" && !agreedToTerms)}
-                className="group h-12 w-full rounded-2xl bg-[#172033] text-white dark:bg-gradient-to-r dark:from-pink-500 dark:to-fuchsia-600"
+                className="group h-12 w-full rounded-2xl bg-primary-surface text-white"
               >
                 {isLoading
                   ? mode === "login"

@@ -1,15 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type {
-  Category,
-  CategoryInsert,
-  CategoryUpdate,
-} from "@/lib/types/database";
+import type { Tag, TagInsert, TagUpdate } from "@/lib/types/database";
 
-export async function getCategories(
-  supabase: SupabaseClient
-): Promise<Category[]> {
+export async function getTags(supabase: SupabaseClient): Promise<Tag[]> {
   const { data, error } = await supabase
-    .from("categories")
+    .from("tags")
     .select("*")
     .order("name", { ascending: true });
 
@@ -17,12 +11,12 @@ export async function getCategories(
   return data;
 }
 
-export async function createCategory(
+export async function createTag(
   supabase: SupabaseClient,
-  input: CategoryInsert
-): Promise<Category> {
+  input: TagInsert
+): Promise<Tag> {
   const { data, error } = await supabase
-    .from("categories")
+    .from("tags")
     .insert(input)
     .select()
     .single();
@@ -31,13 +25,13 @@ export async function createCategory(
   return data;
 }
 
-export async function updateCategory(
+export async function updateTag(
   supabase: SupabaseClient,
   id: string,
-  input: CategoryUpdate
-): Promise<Category> {
+  input: TagUpdate
+): Promise<Tag> {
   const { data, error } = await supabase
-    .from("categories")
+    .from("tags")
     .update(input)
     .eq("id", id)
     .select()
@@ -47,10 +41,10 @@ export async function updateCategory(
   return data;
 }
 
-export async function deleteCategory(
+export async function deleteTag(
   supabase: SupabaseClient,
   id: string
 ): Promise<void> {
-  const { error } = await supabase.from("categories").delete().eq("id", id);
+  const { error } = await supabase.from("tags").delete().eq("id", id);
   if (error) throw error;
 }
