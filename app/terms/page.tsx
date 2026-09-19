@@ -1,3 +1,4 @@
+import { legal } from "@/config/legal";
 import Link from "next/link";
 
 export const metadata = {
@@ -18,7 +19,7 @@ export default function TermsPage() {
         Terms and Conditions
       </h1>
       <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-        Last updated: {new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
+        Last updated: {legal.terms.lastUpdated}
       </p>
 
       <div className="mt-8 flex flex-col gap-6 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
@@ -27,9 +28,8 @@ export default function TermsPage() {
             1. Acceptance of terms
           </h2>
           <p>
-            By creating an account and using Vault, you agree to these Terms
-            and Conditions. If you do not agree, please do not use the
-            service.
+            By creating an account and using Vault, you agree to these Terms and
+            Conditions. If you do not agree, please do not use the service.
           </p>
         </section>
 
@@ -39,9 +39,9 @@ export default function TermsPage() {
           </h2>
           <p>
             Vault stores the financial information you choose to enter —
-            institutions, transactions, categories, and balances — so it can
-            be shown back to you. You are responsible for the accuracy of the
-            data you provide.
+            institutions, transactions, categories, and balances — so it can be
+            shown back to you. You are responsible for the accuracy of the data
+            you provide.
           </p>
         </section>
 
@@ -70,8 +70,8 @@ export default function TermsPage() {
             5. Changes
           </h2>
           <p>
-            These terms may be updated from time to time. Continued use of
-            Vault after a change means you accept the updated terms.
+            These terms may be updated from time to time. Continued use of Vault
+            after a change means you accept the updated terms.
           </p>
         </section>
       </div>

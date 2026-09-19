@@ -1,5 +1,5 @@
 import { AuthForm } from "@/components/auth-form";
-
+export const instant = false;
 export default async function AuthFormPage({
   searchParams,
 }: {
