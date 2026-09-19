@@ -88,6 +88,34 @@ async function SettingsContent() {
 
         <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
           <CardHeader>
+            <CardTitle className="text-base text-foreground dark:text-white">Legal</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+            <div className="flex items-center justify-between">
+              <Link href="/terms" target="_blank" className="text-foreground underline underline-offset-4 dark:text-white">
+                Terms and Conditions
+              </Link>
+              <span>
+                {profile.terms_accepted_at
+                  ? `Accepted ${new Date(profile.terms_accepted_at).toLocaleDateString()}`
+                  : "Not recorded"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <Link href="/privacy" target="_blank" className="text-foreground underline underline-offset-4 dark:text-white">
+                Privacy Policy
+              </Link>
+              <span>
+                {profile.privacy_accepted_at
+                  ? `Accepted ${new Date(profile.privacy_accepted_at).toLocaleDateString()}`
+                  : "Not recorded"}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
+          <CardHeader>
             <CardTitle className="text-base text-foreground dark:text-white">
               Account
             </CardTitle>

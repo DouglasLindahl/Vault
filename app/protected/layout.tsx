@@ -6,6 +6,7 @@ import { getTransactions } from "@/lib/queries/transactions";
 import { getRecurringTransactions } from "@/lib/queries/recurring-transactions";
 import { getInvestmentSummary } from "@/lib/queries/investments";
 import { runRecurringDueCheck } from "@/lib/due-check";
+import { syncLegalAcceptance } from "@/lib/legal-acceptance";
 import { isAdminEmail } from "@/lib/admin";
 import { DashboardProvider } from "@/app/protected/dashboard/dashboard-provider";
 import { DashboardNav } from "@/components/nav/dashboard-nav";
@@ -30,6 +31,11 @@ async function getDashboardData(): Promise<DashboardData> {
       await runRecurringDueCheck(supabase, user.id);
     } catch (err) {
       console.error("Recurring due-check failed:", err);
+    }
+    try {
+      await syncLegalAcceptance(supabase, user);
+    } catch (err) {
+      console.error("Legal-acceptance sync failed:", err);
     }
   }
 

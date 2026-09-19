@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { legal } from "@/config/legal";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -49,9 +50,19 @@ export function SignUpForm({
     setError(null);
 
     try {
+      const now = new Date().toISOString();
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            terms_accepted_at: now,
+            terms_version: legal.terms.version,
+            privacy_accepted_at: now,
+            privacy_version: legal.privacy.version,
+          },
+        },
       });
 
       if (error) throw error;
@@ -140,6 +151,15 @@ export function SignUpForm({
                     className="font-medium underline underline-offset-4"
                   >
                     Terms and Conditions
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium underline underline-offset-4"
+                  >
+                    Privacy Policy
                   </Link>
                 </Label>
               </div>

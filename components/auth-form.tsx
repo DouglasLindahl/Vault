@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { legal } from "@/config/legal";
 import vaultLogo from "@/app/icons/vaultLogo.png";
 
 import { Button } from "@/components/ui/button";
@@ -82,9 +83,23 @@ export function AuthForm({
         throw new Error("You need to agree to the Terms and Conditions.");
       }
 
+      const now = new Date().toISOString();
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          // Stored on auth.users regardless of whether email confirmation
+          // is required (so there's no session yet to write to `profiles`
+          // with) — lib/legal-acceptance.ts copies this into `profiles`
+          // the first time this user shows up on an authenticated request.
+          data: {
+            terms_accepted_at: now,
+            terms_version: legal.terms.version,
+            privacy_accepted_at: now,
+            privacy_version: legal.privacy.version,
+          },
+        },
       });
 
       if (error) throw error;
@@ -258,6 +273,15 @@ export function AuthForm({
                       className="font-medium text-foreground underline underline-offset-4 dark:text-white"
                     >
                       Terms and Conditions
+                    </a>{" "}
+                    and{" "}
+                    <a
+                      href="/privacy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-foreground underline underline-offset-4 dark:text-white"
+                    >
+                      Privacy Policy
                     </a>
                   </Label>
                 </div>
