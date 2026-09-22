@@ -98,7 +98,10 @@ export default function Dashboard() {
   const recentActivity = useMemo(
     () =>
       [...transactions]
-        .sort((a, b) => parseDateOnly(b.date).getTime() - parseDateOnly(a.date).getTime())
+        .sort(
+          (a, b) =>
+            parseDateOnly(b.date).getTime() - parseDateOnly(a.date).getTime(),
+        )
         .slice(0, 5),
     [transactions],
   );
@@ -120,17 +123,14 @@ export default function Dashboard() {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              Good afternoon
+              Vault overview
             </p>
             <h1 className="text-2xl font-bold tracking-tight text-foreground dark:text-white">
               Dashboard
             </h1>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            <AddTransactionDialog
-              institutions={institutions}
-              tags={allTags}
-            />
+            <AddTransactionDialog institutions={institutions} tags={allTags} />
             <div className="hidden sm:contents">
               <AddInstitutionDialog />
               <ManageTagsDialog />
@@ -299,7 +299,9 @@ export default function Dashboard() {
                       : "text-foreground dark:text-white",
                   )}
                 >
-                  {r.direction === "in" ? currency(r.amount) : currency(-r.amount)}
+                  {r.direction === "in"
+                    ? currency(r.amount)
+                    : currency(-r.amount)}
                 </span>
               </div>
             ))}

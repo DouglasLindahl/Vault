@@ -40,12 +40,21 @@ export function DashboardNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { isAdmin } = useDashboardData();
-  const navLinks = isAdmin ? [...links, { href: "/protected/admin", label: "Admin" }] : links;
+  const navLinks = isAdmin
+    ? [...links, { href: "/protected/admin", label: "Admin" }]
+    : links;
 
   return (
     <div className="flex items-center justify-between gap-2 bg-background px-3 pt-6 sm:px-6">
-      <Link href="/protected/dashboard" className="flex shrink-0 items-center gap-2">
-        <Image src={vaultLogo} alt="Vault" className="h-8 w-8 rounded-xl object-contain" />
+      <Link
+        href="/protected/dashboard"
+        className="flex shrink-0 items-center gap-2"
+      >
+        <Image
+          src={vaultLogo}
+          alt="Vault"
+          className="h-8 w-8 rounded-xl object-contain"
+        />
         <span className="hidden text-sm font-bold tracking-tight text-foreground dark:text-white sm:inline">
           Vault
         </span>
@@ -68,14 +77,16 @@ export function DashboardNav() {
           </Link>
         ))}
       </nav>
-      <NotificationsMenu />
-      <Link
-        href="/protected/dashboard/settings"
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-card/95 text-foreground shadow-[0_18px_60px_rgba(23,32,51,0.06)] dark:text-white"
-        aria-label="Settings"
-      >
-        <Settings className="h-5 w-5" />
-      </Link>
+      <div className="flex flex-row gap-4">
+        <NotificationsMenu />
+        <Link
+          href="/protected/dashboard/settings"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-card/95 text-foreground shadow-[0_18px_60px_rgba(23,32,51,0.06)] dark:text-white"
+          aria-label="Settings"
+        >
+          <Settings className="h-5 w-5" />
+        </Link>
+      </div>
 
       {/* Mobile hamburger */}
       <Sheet open={open} onOpenChange={setOpen}>
@@ -91,7 +102,11 @@ export function DashboardNav() {
         <SheetContent side="left" className="w-full max-w-[280px]">
           <SheetHeader>
             <div className="flex items-center gap-2">
-              <Image src={vaultLogo} alt="Vault" className="h-8 w-8 rounded-xl object-contain" />
+              <Image
+                src={vaultLogo}
+                alt="Vault"
+                className="h-8 w-8 rounded-xl object-contain"
+              />
               <SheetTitle>Vault</SheetTitle>
             </div>
           </SheetHeader>

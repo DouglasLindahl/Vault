@@ -26,7 +26,9 @@ function currency(n: number) {
 }
 
 async function lookupCoingeckoId(symbol: string): Promise<string> {
-  const res = await fetch(`/api/coingecko-search?q=${encodeURIComponent(symbol)}`);
+  const res = await fetch(
+    `/api/coingecko-search?q=${encodeURIComponent(symbol)}`,
+  );
   if (!res.ok) {
     throw new Error(
       `Couldn't find "${symbol}" on CoinGecko. Try a different symbol or name.`,
@@ -36,18 +38,28 @@ async function lookupCoingeckoId(symbol: string): Promise<string> {
   return match.id;
 }
 
-async function lookupPriceOnDate(coingeckoId: string, date: string): Promise<number> {
+async function lookupPriceOnDate(
+  coingeckoId: string,
+  date: string,
+): Promise<number> {
   const res = await fetch(
     `/api/coingecko-price?id=${encodeURIComponent(coingeckoId)}&date=${date}`,
   );
   if (!res.ok) {
-    throw new Error("Couldn't find a price for that date. Try a different date.");
+    throw new Error(
+      "Couldn't find a price for that date. Try a different date.",
+    );
   }
   const data = await res.json();
   return data.usd;
 }
 
-type PriceQuote = { symbol: string; date: string; coingeckoId: string; usd: number };
+type PriceQuote = {
+  symbol: string;
+  date: string;
+  coingeckoId: string;
+  usd: number;
+};
 
 export function AddHoldingForm({
   institutionId,
@@ -85,10 +97,17 @@ export function AddHoldingForm({
     try {
       const coingeckoId = await lookupCoingeckoId(symbol.trim());
       const usd = await lookupPriceOnDate(coingeckoId, date);
-      setPriceQuote({ symbol: symbol.trim().toUpperCase(), date, coingeckoId, usd });
+      setPriceQuote({
+        symbol: symbol.trim().toUpperCase(),
+        date,
+        coingeckoId,
+        usd,
+      });
     } catch (err) {
       setPriceQuote(null);
-      setError(err instanceof Error ? err.message : "Couldn't price that asset.");
+      setError(
+        err instanceof Error ? err.message : "Couldn't price that asset.",
+      );
     } finally {
       setIsQuoting(false);
     }
@@ -101,7 +120,9 @@ export function AddHoldingForm({
     if (!isCash && !symbol.trim()) return setError("Enter a symbol.");
     if (!quantity || quantityNum <= 0)
       return setError(
-        isCash ? "Enter an amount greater than zero." : "Enter a quantity greater than zero.",
+        isCash
+          ? "Enter an amount greater than zero."
+          : "Enter a quantity greater than zero.",
       );
     if (assetType === "stock" && (!amount || Number(amount) <= 0))
       return setError("Enter an amount invested greater than zero.");
@@ -125,7 +146,12 @@ export function AddHoldingForm({
         if (!quote) {
           const id = await lookupCoingeckoId(symbol.trim());
           const usd = await lookupPriceOnDate(id, date);
-          quote = { symbol: symbol.trim().toUpperCase(), date, coingeckoId: id, usd };
+          quote = {
+            symbol: symbol.trim().toUpperCase(),
+            date,
+            coingeckoId: id,
+            usd,
+          };
         }
         coingeckoId = quote.coingeckoId;
         usdAmount = quote.usd * quantityNum;
@@ -192,7 +218,7 @@ export function AddHoldingForm({
             <Label htmlFor="holding-symbol">Symbol</Label>
             <Input
               id="holding-symbol"
-              placeholder={assetType === "crypto" ? "SOL" : "NVDA"}
+              placeholder={assetType === "crypto" ? "BTC" : "NVDA"}
               value={symbol}
               onChange={(e) => setSymbol(e.target.value)}
               onBlur={refreshQuote}
@@ -210,12 +236,14 @@ export function AddHoldingForm({
         }
       >
         <div className="grid gap-2">
-          <Label htmlFor="holding-quantity">{isCash ? "Amount (USD)" : "Quantity"}</Label>
+          <Label htmlFor="holding-quantity">
+            {isCash ? "Amount (USD)" : "Quantity"}
+          </Label>
           <Input
             id="holding-quantity"
             type="number"
             step={isCash ? "0.01" : "any"}
-            placeholder={isCash ? "100.00" : "1.3"}
+            placeholder={isCash ? "0" : "0"}
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
             className="h-11 rounded-2xl"
@@ -229,7 +257,7 @@ export function AddHoldingForm({
               id="holding-amount"
               type="number"
               step="0.01"
-              placeholder="150.00"
+              placeholder="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="h-11 rounded-2xl"

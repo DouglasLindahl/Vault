@@ -63,7 +63,7 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
           <Label htmlFor="institution-name">Name</Label>
           <Input
             id="institution-name"
-            placeholder="SEB"
+            placeholder="Institution name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="h-11 rounded-2xl"
@@ -71,7 +71,10 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
         </div>
         <div className="grid gap-2">
           <Label>Type</Label>
-          <Select value={type} onValueChange={(v) => setType(v as InstitutionType)}>
+          <Select
+            value={type}
+            onValueChange={(v) => setType(v as InstitutionType)}
+          >
             <SelectTrigger className="h-11 rounded-2xl">
               <SelectValue />
             </SelectTrigger>
@@ -89,7 +92,7 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
           id="starting-balance"
           type="number"
           step="0.01"
-          placeholder="300.00"
+          placeholder="0"
           value={startingBalance}
           onChange={(e) => setStartingBalance(e.target.value)}
           className="h-11 rounded-2xl sm:w-48"
