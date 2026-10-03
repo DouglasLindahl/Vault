@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getPendingRecurringEntriesAction } from "@/lib/actions/recurring-pending";
 import { completePendingRecurringEntryAction } from "@/lib/actions/transactions";
@@ -18,19 +18,45 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-// Pops up automatically (instead of a persistent banner) whenever there's a
-// recurring transaction whose amount varies and is due. Works through
-// entries one at a time; each one also has a matching notification in the
-// bell menu (created by lib/due-check.ts), so closing this dialog without
-// finishing isn't a dead end — and it reopens the next time the app loads,
-// since the entry stays "pending" until an amount is entered.
-export function PendingAmountDialog() {
+type PendingAmountsContextValue = {
+  entries: RecurringTransactionPendingWithRelations[];
+  openEntry: (id: string) => void;
+};
+
+const PendingAmountsContext = createContext<PendingAmountsContextValue>({
+  entries: [],
+  openEntry: () => {},
+});
+
+// Lets other components (e.g. the dashboard's "amount missing" card) show
+// what's still pending and jump straight into the dialog for it.
+export function usePendingAmounts() {
+  return useContext(PendingAmountsContext);
+}
+
+// Pops up automatically whenever there's a recurring transaction whose
+// amount varies and is due. Works through entries one at a time; each one
+// also has a matching notification in the bell menu (created by
+// lib/due-check.ts) and a card on the dashboard, so closing this dialog
+// without finishing isn't a dead end — the entry stays "pending" until an
+// amount is entered.
+export function PendingAmountProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [entries, setEntries] = useState<RecurringTransactionPendingWithRelations[]>([]);
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function openEntry(id: string) {
+    setEntries((prev) => {
+      const entry = prev.find((e) => e.id === id);
+      return entry ? [entry, ...prev.filter((e) => e.id !== id)] : prev;
+    });
+    setAmount("");
+    setError(null);
+    setOpen(true);
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -82,9 +108,10 @@ export function PendingAmountDialog() {
     }
   }
 
-  if (!activeEntry) return null;
-
   return (
+    <PendingAmountsContext.Provider value={{ entries, openEntry }}>
+      {children}
+      {activeEntry && (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="max-w-sm rounded-[28px] border-border">
         <DialogHeader>
@@ -146,5 +173,7 @@ export function PendingAmountDialog() {
         </form>
       </DialogContent>
     </Dialog>
+      )}
+    </PendingAmountsContext.Provider>
   );
 }

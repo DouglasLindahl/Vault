@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { deleteTransactionAction } from "@/lib/actions/transactions";
 import { deleteRecurringTransactionAction } from "@/lib/actions/recurring-transactions";
 import { deleteTag } from "@/lib/queries/tags";
-import { deleteConversion } from "@/lib/queries/investments";
+import { deleteConversionAction } from "@/lib/actions/investments";
 
 export function DeleteRowButton({
   kind,
@@ -29,7 +29,7 @@ export function DeleteRowButton({
       } else if (kind === "recurring-transaction") {
         await deleteRecurringTransactionAction(id);
       } else if (kind === "investment") {
-        await deleteConversion(createClient(), id);
+        await deleteConversionAction(id);
       } else {
         await deleteTag(createClient(), id);
       }

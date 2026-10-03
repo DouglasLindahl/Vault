@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createInstitutionAction } from "@/lib/actions/institutions";
 import type { InstitutionType } from "@/lib/types/database";
+import { todayDateOnly } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,7 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
         name: name.trim(),
         type,
         startingBalance: startingBalance ? Number(startingBalance) : 0,
+        asOfDate: todayDateOnly(),
       });
 
       if (onSuccess) {

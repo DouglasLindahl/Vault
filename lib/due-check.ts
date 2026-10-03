@@ -33,12 +33,20 @@ export async function runRecurringDueCheck(
       const key = `${r.id}_${date}`;
       if (occurrenceKeys.has(key) || pendingKeys.has(key)) continue;
 
+      // Overlapping page loads can race to create the same occurrence; the
+      // unique indexes on (recurring_transaction_id, date/due_date) make the
+      // loser fail with 23505, which just means "already handled".
       if (r.is_estimate) {
-        await createPendingRecurringEntry(supabase, {
-          user_id: userId,
-          recurring_transaction_id: r.id,
-          due_date: date,
-        });
+        try {
+          await createPendingRecurringEntry(supabase, {
+            user_id: userId,
+            recurring_transaction_id: r.id,
+            due_date: date,
+          });
+        } catch (err) {
+          if (isUniqueViolation(err)) continue;
+          throw err;
+        }
         await createNotification(supabase, {
           user_id: userId,
           type: "recurring_amount_needed",
@@ -47,16 +55,24 @@ export async function runRecurringDueCheck(
           link: "/protected/dashboard/recurring-transactions",
         });
       } else {
-        await createTransaction(supabase, {
-          user_id: userId,
-          institution_id: r.institution_id,
-          recurring_transaction_id: r.id,
-          name: r.name,
-          amount: r.amount,
-          direction: r.direction,
-          date,
-        });
+        try {
+          await createTransaction(supabase, {
+            user_id: userId,
+            institution_id: r.institution_id,
+            recurring_transaction_id: r.id,
+            name: r.name,
+            amount: r.amount,
+            direction: r.direction,
+            date,
+          });
+        } catch (err) {
+          if (!isUniqueViolation(err)) throw err;
+        }
       }
     }
   }
+}
+
+function isUniqueViolation(err: unknown) {
+  return typeof err === "object" && err !== null && "code" in err && err.code === "23505";
 }

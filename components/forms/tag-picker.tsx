@@ -57,11 +57,13 @@ export function TagPicker({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    // modal: the picker lives inside a Dialog, whose scroll lock otherwise
+    // swallows wheel/touch scrolling in the (portaled) tag list.
+    <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="flex h-11 w-full items-center justify-between gap-2 rounded-2xl border border-border px-3.5 text-sm"
+          className="flex min-h-11 w-full items-center justify-between gap-2 rounded-2xl border border-border px-3.5 py-1.5 text-sm"
         >
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
             {selected.length === 0 && (
@@ -95,7 +97,7 @@ export function TagPicker({
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-72 rounded-2xl border-border p-2" align="start">
-        <div className="flex max-h-56 flex-col gap-0.5 overflow-y-auto">
+        <div className="flex max-h-56 flex-col gap-0.5 overflow-y-auto overscroll-contain">
           {tags.length === 0 && (
             <p className="px-2 py-2 text-sm text-zinc-500 dark:text-zinc-400">
               No tags yet — create one below.

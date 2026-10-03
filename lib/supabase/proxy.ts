@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { hasEnvVars } from "../utils";
+import { REMEMBER_COOKIE, withRememberPreference } from "./remember";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -30,8 +31,13 @@ export async function updateSession(request: NextRequest) {
           supabaseResponse = NextResponse.next({
             request,
           });
+          const remember = request.cookies.get(REMEMBER_COOKIE)?.value !== "0";
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
+            supabaseResponse.cookies.set(
+              name,
+              value,
+              withRememberPreference(options, remember),
+            ),
           );
         },
       },
@@ -59,6 +65,24 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth/auth-form";
     return NextResponse.redirect(url);
+  }
+
+  // Automatic login: a remembered session skips the landing and login
+  // pages and goes straight to the dashboard.
+  if (
+    user &&
+    (request.nextUrl.pathname === "/" ||
+      request.nextUrl.pathname === "/auth/auth-form" ||
+      request.nextUrl.pathname === "/auth/login")
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/protected/dashboard";
+    url.search = "";
+    const redirect = NextResponse.redirect(url);
+    supabaseResponse.cookies
+      .getAll()
+      .forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

@@ -1,8 +1,9 @@
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getTags } from "@/lib/queries/tags";
-import { getInstitutions } from "@/lib/queries/institutions";
+import { getInstitutions, migrateLegacyBalances } from "@/lib/queries/institutions";
 import { getTransactions } from "@/lib/queries/transactions";
+import { formatDateOnly } from "@/lib/recurring-due";
 import { getRecurringTransactions } from "@/lib/queries/recurring-transactions";
 import { getInvestmentSummary } from "@/lib/queries/investments";
 import { runRecurringDueCheck } from "@/lib/due-check";
@@ -10,7 +11,7 @@ import { syncLegalAcceptance } from "@/lib/legal-acceptance";
 import { isAdminEmail } from "@/lib/admin";
 import { DashboardProvider } from "@/app/protected/dashboard/dashboard-provider";
 import { DashboardNav } from "@/components/nav/dashboard-nav";
-import { PendingAmountDialog } from "@/components/recurring/pending-amount-dialog";
+import { PendingAmountProvider } from "@/components/recurring/pending-amount-dialog";
 import { PageLoading } from "@/components/ui/spinner";
 import type {
   DashboardData,
@@ -27,6 +28,13 @@ async function getDashboardData(): Promise<DashboardData> {
     data: { user },
   } = await supabase.auth.getUser();
   if (user) {
+    // Must run before the due-check: legacy balances are anchored to their
+    // stored value, which doesn't include occurrences generated from now on.
+    try {
+      await migrateLegacyBalances(supabase, formatDateOnly(new Date()));
+    } catch (err) {
+      console.error("Balance migration failed:", err);
+    }
     try {
       await runRecurringDueCheck(supabase, user.id);
     } catch (err) {
@@ -42,7 +50,11 @@ async function getDashboardData(): Promise<DashboardData> {
   const [tags, institutionRows, transactionRows, recurringRows] = await Promise.all([
     getTags(supabase),
     getInstitutions(supabase),
-    getTransactions(supabase, { limit: 200 }),
+    // The dashboard's widest window is "Year" (last 365 days). A row-count
+    // limit here used to cut that total short once there were >200 rows.
+    getTransactions(supabase, {
+      startDate: formatDateOnly(new Date(Date.now() - 366 * 24 * 60 * 60 * 1000)),
+    }),
     getRecurringTransactions(supabase, { activeOnly: true }),
   ]);
 
@@ -101,9 +113,10 @@ async function DashboardShell({ children }: { children: React.ReactNode }) {
 
   return (
     <DashboardProvider data={data}>
-      <DashboardNav />
-      <PendingAmountDialog />
-      {children}
+      <PendingAmountProvider>
+        <DashboardNav />
+        {children}
+      </PendingAmountProvider>
     </DashboardProvider>
   );
 }

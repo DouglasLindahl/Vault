@@ -6,6 +6,22 @@ const INTERVAL_DAYS: Partial<Record<Frequency, number>> = {
   biweekly: 14,
 };
 
+// Approximate factor to normalize a recurring amount to a monthly figure,
+// for comparing recurring transactions of different frequencies side by
+// side. Not exact (e.g. weekly isn't always 4.33 weeks/month) — good
+// enough for a comparative stat, not for accounting.
+export const MONTHLY_MULTIPLIER: Record<Frequency, number> = {
+  daily: 30,
+  weekly: 4.33,
+  biweekly: 2.17,
+  monthly: 1,
+  yearly: 1 / 12,
+};
+
+export function monthlyAmount(amount: number, frequency: Frequency) {
+  return amount * MONTHLY_MULTIPLIER[frequency];
+}
+
 function daysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
 }

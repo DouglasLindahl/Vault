@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, setRememberMe } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { legal } from "@/config/legal";
 import vaultLogo from "@/app/icons/vaultLogo.png";
@@ -36,6 +36,7 @@ export function AuthForm({
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [rememberMe, setRememberMeChecked] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -59,6 +60,7 @@ export function AuthForm({
 
     try {
       if (mode === "login") {
+        setRememberMe(rememberMe);
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -248,6 +250,24 @@ export function AuthForm({
                   <p className="text-xs text-zinc-400">
                     Use at least 8 characters.
                   </p>
+                </div>
+              )}
+
+              {mode === "login" && (
+                <div className="flex items-center gap-2.5">
+                  <Checkbox
+                    id="remember-me"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) =>
+                      setRememberMeChecked(checked === true)
+                    }
+                  />
+                  <Label
+                    htmlFor="remember-me"
+                    className="text-sm font-normal text-zinc-500 dark:text-zinc-400"
+                  >
+                    Remember me
+                  </Label>
                 </div>
               )}
 

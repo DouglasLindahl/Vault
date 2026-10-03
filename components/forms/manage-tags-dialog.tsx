@@ -71,21 +71,23 @@ export function ManageTagsDialog({
               No tags yet.
             </p>
           )}
-          {tags.map((tag) => (
-            <div
-              key={tag.id}
-              className="flex items-center justify-between rounded-xl px-2 py-1.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]"
-            >
-              <span className="flex items-center gap-2 text-sm text-foreground dark:text-white">
-                <span
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: tag.color }}
-                />
-                {tag.name}
-              </span>
-              <DeleteRowButton kind="tag" id={tag.id} />
-            </div>
-          ))}
+          <div className="flex max-h-64 flex-col gap-1 overflow-y-auto overscroll-contain pr-1">
+            {tags.map((tag) => (
+              <div
+                key={tag.id}
+                className="flex items-center justify-between rounded-xl px-2 py-1.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]"
+              >
+                <span className="flex items-center gap-2 text-sm text-foreground dark:text-white">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: tag.color }}
+                  />
+                  {tag.name}
+                </span>
+                <DeleteRowButton kind="tag" id={tag.id} />
+              </div>
+            ))}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

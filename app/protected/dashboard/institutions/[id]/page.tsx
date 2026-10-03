@@ -9,6 +9,7 @@ import { nextOccurrence } from "@/lib/recurrence";
 import { AdjustBalanceDialog } from "@/components/forms/adjust-balance-dialog";
 import { AddHoldingDialog } from "@/components/forms/add-holding-dialog";
 import { DeleteRowButton } from "@/components/forms/delete-row-button";
+import { EditRecurringAmountButton } from "@/components/forms/edit-recurring-amount-button";
 import { DeleteInstitutionDialog } from "@/components/forms/delete-institution-dialog";
 import { TagChips } from "@/components/tag-chips";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -256,6 +257,11 @@ async function InstitutionDetail({ id }: { id: string }) {
                     >
                       {r.direction === "in" ? currency(r.amount) : currency(-r.amount)}
                     </span>
+                    <EditRecurringAmountButton
+                      id={r.id}
+                      name={r.name ?? frequencyLabel[r.frequency]}
+                      amount={r.amount}
+                    />
                     <DeleteRowButton kind="recurring-transaction" id={r.id} />
                   </div>
                 </div>

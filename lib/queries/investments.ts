@@ -67,7 +67,9 @@ export async function deleteConversion(
   if (!holding) return;
 
   const remaining = holding.quantity - conversion.asset_quantity;
-  if (remaining <= 0) {
+  // Float subtraction leaves dust (e.g. 0.3 - 0.1 - 0.2 = 2.7e-17) that
+  // would otherwise keep an "empty" holding row around.
+  if (remaining <= 1e-9) {
     const { error } = await supabase
       .from("crypto_holdings")
       .delete()

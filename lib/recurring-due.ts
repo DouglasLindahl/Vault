@@ -29,14 +29,15 @@ export function formatDateOnly(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-// Every occurrence from `startDate` up to (and including) `upTo`, capped at
-// `maxCount` so a very old/neglected recurring transaction can't produce an
-// unbounded catch-up list the first time the app is opened again.
+// Every occurrence from `startDate` up to (and including) `upTo`. The cap
+// is only a runaway guard: it used to be 90, which silently stopped daily
+// rules after 90 days (and weekly ones after 90 weeks), because this
+// always enumerates from `startDate`, not from the last generated one.
 export function getOccurrencesUpTo(
   startDate: string,
   frequency: Frequency,
   upTo: Date = new Date(),
-  maxCount = 90,
+  maxCount = 10_000,
 ): Date[] {
   const limit = startOfDay(upTo);
   const occurrences: Date[] = [];

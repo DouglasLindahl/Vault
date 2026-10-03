@@ -18,6 +18,9 @@ export type Institution = {
   starting_balance: number;
   starting_balance_date: string; // date
   current_balance: number;
+  // true once the balance is derived from starting_balance(+_date) plus
+  // transactions — see lib/queries/institutions.ts.
+  balance_anchored: boolean;
   sort_order: number;
   created_at: string;
 };
@@ -29,6 +32,7 @@ export type InstitutionInsert = {
   starting_balance?: number;
   starting_balance_date?: string;
   current_balance?: number;
+  balance_anchored?: boolean;
   sort_order?: number;
 };
 

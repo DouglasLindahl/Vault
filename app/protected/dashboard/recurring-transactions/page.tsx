@@ -25,7 +25,11 @@ async function RecurringTransactionsContent() {
         <AddTransactionDialog institutions={institutions} tags={tags} />
       </div>
 
-      <RecurringTransactionsList recurring={recurring} />
+      <RecurringTransactionsList
+        recurring={recurring}
+        tags={tags}
+        institutions={institutions}
+      />
     </>
   );
 }

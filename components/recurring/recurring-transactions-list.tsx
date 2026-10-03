@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { nextOccurrence } from "@/lib/recurrence";
+import { monthlyAmount, nextOccurrence } from "@/lib/recurrence";
 import { DeleteRowButton } from "@/components/forms/delete-row-button";
+import { EditRecurringAmountButton } from "@/components/forms/edit-recurring-amount-button";
 import { TagChips } from "@/components/tag-chips";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -13,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { RecurringTransactionWithRelations } from "@/lib/types/database";
+import type { TagOption } from "@/lib/types";
 
 function currency(n: number) {
   const sign = n < 0 ? "-" : "";
@@ -30,8 +32,10 @@ const frequencyLabel = {
   yearly: "Yearly",
 } as const;
 
-function signedAmount(r: RecurringTransactionWithRelations) {
-  return r.direction === "in" ? r.amount : -r.amount;
+// Monthly equivalent, so weekly/yearly/etc. items add up sensibly.
+function signedMonthlyAmount(r: RecurringTransactionWithRelations) {
+  const monthly = monthlyAmount(r.amount, r.frequency);
+  return r.direction === "in" ? monthly : -monthly;
 }
 
 type GroupBy = "institution" | "tag" | "none";
@@ -123,6 +127,11 @@ function RecurringRow({ r }: { r: RecurringTransactionWithRelations }) {
         >
           {r.direction === "in" ? currency(r.amount) : currency(-r.amount)}
         </span>
+        <EditRecurringAmountButton
+          id={r.id}
+          name={r.name ?? (r.direction === "in" ? "Income" : "Expense")}
+          amount={r.amount}
+        />
         <DeleteRowButton kind="recurring-transaction" id={r.id} />
       </div>
     </div>
@@ -130,7 +139,7 @@ function RecurringRow({ r }: { r: RecurringTransactionWithRelations }) {
 }
 
 function GroupCard({ group }: { group: Group }) {
-  const subtotal = group.items.reduce((sum, r) => sum + signedAmount(r), 0);
+  const subtotal = group.items.reduce((sum, r) => sum + signedMonthlyAmount(r), 0);
   return (
     <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-2">
@@ -154,18 +163,53 @@ function GroupCard({ group }: { group: Group }) {
   );
 }
 
+const ALL = "__all__";
+const UNTAGGED = "__untagged__";
+
+function Total({ label, value, className }: { label: string; value: number; className: string }) {
+  return (
+    <div>
+      <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">{label}</p>
+      <p className={`text-2xl font-bold tabular-nums ${className}`}>{currency(value)}</p>
+    </div>
+  );
+}
+
 export function RecurringTransactionsList({
   recurring,
+  tags,
+  institutions,
 }: {
   recurring: RecurringTransactionWithRelations[];
+  tags: TagOption[];
+  institutions: { id: string; name: string }[];
 }) {
   const [groupBy, setGroupBy] = useState<GroupBy>("institution");
+  const [tagFilter, setTagFilter] = useState<string>(ALL);
+  const [institutionFilter, setInstitutionFilter] = useState<string>(ALL);
 
-  const groups = useMemo(() => groupRecurring(recurring, groupBy), [recurring, groupBy]);
-  const grandTotal = useMemo(
-    () => recurring.reduce((sum, r) => sum + signedAmount(r), 0),
-    [recurring],
+  const filtered = useMemo(
+    () =>
+      recurring.filter((r) => {
+        if (institutionFilter !== ALL && r.institution_id !== institutionFilter) return false;
+        if (tagFilter === UNTAGGED) return r.tags.length === 0;
+        if (tagFilter !== ALL) return r.tags.some((t) => t.id === tagFilter);
+        return true;
+      }),
+    [recurring, tagFilter, institutionFilter],
   );
+
+  const groups = useMemo(() => groupRecurring(filtered, groupBy), [filtered, groupBy]);
+  const totals = useMemo(() => {
+    let totalIn = 0;
+    let totalOut = 0;
+    for (const r of filtered) {
+      const monthly = monthlyAmount(r.amount, r.frequency);
+      if (r.direction === "in") totalIn += monthly;
+      else totalOut += monthly;
+    }
+    return { totalIn, totalOut, net: totalIn - totalOut };
+  }, [filtered]);
 
   if (recurring.length === 0) {
     return (
@@ -188,35 +232,73 @@ export function RecurringTransactionsList({
   return (
     <div className="flex flex-col gap-5">
       <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
-        <CardContent className="flex flex-wrap items-center justify-between gap-4 pt-6">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
-              Total recurring
-            </p>
-            <p
-              className={
-                grandTotal >= 0
-                  ? "text-2xl font-bold tabular-nums text-success"
-                  : "text-2xl font-bold tabular-nums text-foreground dark:text-white"
-              }
-            >
-              {currency(grandTotal)}
-            </p>
+        <CardContent className="flex flex-col gap-5 pt-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <Total label="Total in / mo" value={totals.totalIn} className="text-success" />
+            <Total
+              label="Total out / mo"
+              value={-totals.totalOut}
+              className="text-foreground dark:text-white"
+            />
+            <Total
+              label="In minus out / mo"
+              value={totals.net}
+              className={totals.net >= 0 ? "text-success" : "text-foreground dark:text-white"}
+            />
           </div>
-          <Select value={groupBy} onValueChange={(v) => setGroupBy(v as GroupBy)}>
-            <SelectTrigger className="h-9 rounded-xl text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="institution">By institution</SelectItem>
-              <SelectItem value="tag">By tag</SelectItem>
-              <SelectItem value="none">No grouping</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={tagFilter} onValueChange={setTagFilter}>
+              <SelectTrigger className="h-9 w-auto min-w-40 rounded-xl text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>All tags</SelectItem>
+                {tags.map((tag) => (
+                  <SelectItem key={tag.id} value={tag.id}>
+                    <span className="flex items-center gap-2">
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: tag.color }}
+                      />
+                      {tag.name}
+                    </span>
+                  </SelectItem>
+                ))}
+                <SelectItem value={UNTAGGED}>Untagged</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={institutionFilter} onValueChange={setInstitutionFilter}>
+              <SelectTrigger className="h-9 w-auto min-w-40 rounded-xl text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>All institutions</SelectItem>
+                {institutions.map((i) => (
+                  <SelectItem key={i.id} value={i.id}>
+                    {i.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={groupBy} onValueChange={(v) => setGroupBy(v as GroupBy)}>
+              <SelectTrigger className="h-9 w-auto min-w-40 rounded-xl text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="institution">By institution</SelectItem>
+                <SelectItem value="tag">By tag</SelectItem>
+                <SelectItem value="none">No grouping</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
       </Card>
 
-      {groupBy === "none" ? (
+      {filtered.length === 0 ? (
+        <p className="px-2 text-sm text-zinc-500 dark:text-zinc-400">
+          No recurring transactions match these filters.
+        </p>
+      ) : groupBy === "none" ? (
         <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
           <CardHeader>
             <CardTitle className="text-base text-foreground dark:text-white">

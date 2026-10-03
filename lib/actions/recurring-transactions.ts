@@ -8,7 +8,9 @@ import {
   createRecurringTransaction,
   deleteRecurringTransaction,
   setRecurringTransactionTags,
+  updateRecurringTransaction,
 } from "@/lib/queries/recurring-transactions";
+import { refresh } from "next/cache";
 import type { Direction, Frequency } from "@/lib/types/database";
 
 export async function createRecurringTransactionAction(input: {
@@ -43,6 +45,13 @@ export async function createRecurringTransactionAction(input: {
   }
 
   return recurring;
+}
+
+export async function updateRecurringAmountAction(id: string, amount: number) {
+  if (!(amount > 0)) throw new Error("Enter an amount greater than zero.");
+  const supabase = await createClient();
+  await updateRecurringTransaction(supabase, id, { amount });
+  refresh();
 }
 
 export async function deleteRecurringTransactionAction(id: string) {

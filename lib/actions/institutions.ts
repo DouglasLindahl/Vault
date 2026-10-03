@@ -6,16 +6,20 @@
 import { createClient } from "@/lib/supabase/server";
 import {
   createInstitution,
-  updateInstitution,
+  setInstitutionBalance,
   deleteInstitution,
   reorderInstitutions,
 } from "@/lib/queries/institutions";
 import type { InstitutionType } from "@/lib/types/database";
 
+// `asOfDate` is the user's local today (YYYY-MM-DD) — the server's UTC date
+// can be a day off, which would shift which transactions count toward the
+// balance anchor (see lib/queries/institutions.ts).
 export async function createInstitutionAction(input: {
   name: string;
   type: InstitutionType;
   startingBalance: number;
+  asOfDate: string;
 }) {
   const supabase = await createClient();
   const {
@@ -28,12 +32,17 @@ export async function createInstitutionAction(input: {
     name: input.name,
     type: input.type,
     starting_balance: input.startingBalance,
+    starting_balance_date: input.asOfDate,
   });
 }
 
-export async function updateInstitutionBalanceAction(id: string, currentBalance: number) {
+export async function updateInstitutionBalanceAction(
+  id: string,
+  currentBalance: number,
+  asOfDate: string,
+) {
   const supabase = await createClient();
-  return updateInstitution(supabase, id, { current_balance: currentBalance });
+  await setInstitutionBalance(supabase, id, currentBalance, asOfDate);
 }
 
 export async function deleteInstitutionAction(id: string) {

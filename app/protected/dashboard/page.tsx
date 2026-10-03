@@ -18,6 +18,7 @@ import { AddTransactionDialog } from "@/components/forms/add-transaction-dialog"
 import { ManageTagsDialog } from "@/components/forms/manage-tags-dialog";
 import { SortableAccountsList } from "@/components/accounts/sortable-accounts-list";
 import { TagChips } from "@/components/tag-chips";
+import { PendingAmountsCard } from "@/components/recurring/pending-amounts-card";
 
 import {
   ArrowUpRight,
@@ -137,6 +138,8 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        <PendingAmountsCard />
 
         {/* Metric cards */}
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">

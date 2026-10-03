@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateInstitutionBalanceAction } from "@/lib/actions/institutions";
+import { todayDateOnly } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +36,7 @@ export function AdjustBalanceForm({
     setIsLoading(true);
 
     try {
-      await updateInstitutionBalanceAction(institutionId, Number(balance));
+      await updateInstitutionBalanceAction(institutionId, Number(balance), todayDateOnly());
 
       if (onSuccess) {
         onSuccess();

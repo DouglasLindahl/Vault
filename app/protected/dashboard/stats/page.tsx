@@ -5,7 +5,7 @@ import { getTransactions } from "@/lib/queries/transactions";
 import { getRecurringTransactions } from "@/lib/queries/recurring-transactions";
 import { getInvestmentSummary } from "@/lib/queries/investments";
 import { StatsCharts } from "@/components/charts/stats-charts";
-import type { Frequency } from "@/lib/types/database";
+import { MONTHLY_MULTIPLIER } from "@/lib/recurrence";
 import { CashFlowChart } from "@/components/charts/cash-flow-chart";
 import { InvestmentsChart } from "@/components/charts/investments-chart";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
@@ -18,18 +18,6 @@ function currency(n: number) {
     maximumFractionDigits: 2,
   })}`;
 }
-
-// Approximate factor to normalize a recurring amount to a monthly figure,
-// for comparing recurring transactions of different frequencies side by
-// side. Not exact (e.g. weekly isn't always 4.33 weeks/month) — good
-// enough for a comparative stat, not for accounting.
-const MONTHLY_MULTIPLIER: Record<Frequency, number> = {
-  daily: 30,
-  weekly: 4.33,
-  biweekly: 2.17,
-  monthly: 1,
-  yearly: 1 / 12,
-};
 
 async function StatsContent() {
   const supabase = await createClient();
