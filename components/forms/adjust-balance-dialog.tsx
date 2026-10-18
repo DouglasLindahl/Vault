@@ -18,10 +18,12 @@ export function AdjustBalanceDialog({
   institutionId,
   institutionName,
   currentBalance,
+  currency,
 }: {
   institutionId: string;
   institutionName: string;
   currentBalance: number;
+  currency?: string;
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -54,6 +56,7 @@ export function AdjustBalanceDialog({
         <AdjustBalanceForm
           institutionId={institutionId}
           currentBalance={currentBalance}
+          currency={currency}
           onSuccess={handleSuccess}
         />
       </DialogContent>

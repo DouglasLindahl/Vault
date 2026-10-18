@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { bucketIncomeExpense, type Granularity } from "@/lib/stats";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { currency, useChartColors, ChartTooltip } from "@/components/charts/chart-utils";
+import { useChartMoney, useChartColors, ChartTooltip } from "@/components/charts/chart-utils";
 
 const GRANULARITIES: { value: Granularity; label: string }[] = [
   { value: "day", label: "Daily" },
@@ -56,6 +56,7 @@ export function CashFlowChart({
   transactions: { date: string; direction: "in" | "out"; amount: number }[];
 }) {
   const colors = useChartColors();
+  const currency = useChartMoney();
   const [incomeGranularity, setIncomeGranularity] = useState<Granularity>("month");
   const [spendGranularity, setSpendGranularity] = useState<Granularity>("month");
 

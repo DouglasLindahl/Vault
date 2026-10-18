@@ -21,10 +21,12 @@ export function EditRecurringAmountButton({
   id,
   name,
   amount: currentAmount,
+  currency,
 }: {
   id: string;
   name: string;
   amount: number;
+  currency?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(String(currentAmount));
@@ -81,7 +83,9 @@ export function EditRecurringAmountButton({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid gap-2">
-            <Label htmlFor={`recurring-amount-${id}`}>Amount</Label>
+            <Label htmlFor={`recurring-amount-${id}`}>
+              Amount{currency ? ` (${currency})` : ""}
+            </Label>
             <Input
               id={`recurring-amount-${id}`}
               type="number"

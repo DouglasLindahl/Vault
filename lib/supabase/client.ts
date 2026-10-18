@@ -1,13 +1,23 @@
 import { createBrowserClient, type CookieOptions } from "@supabase/ssr";
 import { REMEMBER_COOKIE, withRememberPreference } from "./remember";
 
+// A malformed %-sequence in any cookie (even one set by something else on
+// this domain) must not break auth, so decoding falls back to the raw text.
+function safeDecode(text: string) {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+}
+
 function readCookies() {
   if (!document.cookie) return [];
   return document.cookie.split("; ").map((pair) => {
     const i = pair.indexOf("=");
     return {
-      name: decodeURIComponent(pair.slice(0, i)),
-      value: decodeURIComponent(pair.slice(i + 1)),
+      name: safeDecode(pair.slice(0, i)),
+      value: safeDecode(pair.slice(i + 1)),
     };
   });
 }

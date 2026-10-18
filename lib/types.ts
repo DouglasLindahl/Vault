@@ -1,8 +1,12 @@
+import type { DashboardLayout } from "@/lib/dashboard-layout";
+import type { FxRates } from "@/lib/currency";
+
 export type Institution = {
   id: string;
   name: string;
   type: "bank" | "investment";
-  balance: number;
+  balance: number; // in `currency`
+  currency: string;
 };
 
 export type TagOption = {
@@ -16,7 +20,8 @@ export type Transaction = {
   name: string | null;
   tags: TagOption[];
   institutionName: string;
-  amount: number;
+  amount: number; // in `currency` (the institution's)
+  currency: string;
   direction: "in" | "out";
   date: string; // ISO date string
 };
@@ -26,7 +31,8 @@ export type RecurringTransaction = {
   name: string | null;
   tags: TagOption[];
   institutionName: string;
-  amount: number;
+  amount: number; // in `currency` (the institution's)
+  currency: string;
   direction: "in" | "out";
   frequency: "daily" | "weekly" | "biweekly" | "monthly" | "yearly";
   startDate: string; // ISO date string
@@ -38,4 +44,10 @@ export type DashboardData = {
   recurringTransactions: RecurringTransaction[];
   tags: TagOption[];
   isAdmin: boolean;
+  displayName: string | null;
+  dashboardLayout: DashboardLayout;
+  // The user's display currency (profiles.currency) — every total across
+  // institutions is converted into it with `fxRates`.
+  baseCurrency: string;
+  fxRates: FxRates;
 };

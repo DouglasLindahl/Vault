@@ -9,6 +9,10 @@ import { getInvestmentSummary } from "@/lib/queries/investments";
 import { runRecurringDueCheck } from "@/lib/due-check";
 import { syncLegalAcceptance } from "@/lib/legal-acceptance";
 import { isAdminEmail } from "@/lib/admin";
+import { getDashboardPrefs } from "@/lib/queries/dashboard-layout";
+import { sanitizeLayout } from "@/lib/dashboard-layout";
+import { convert, DEFAULT_CURRENCY } from "@/lib/currency";
+import { getFxRates } from "@/lib/fx";
 import { DashboardProvider } from "@/app/protected/dashboard/dashboard-provider";
 import { DashboardNav } from "@/components/nav/dashboard-nav";
 import { PendingAmountProvider } from "@/components/recurring/pending-amount-dialog";
@@ -47,7 +51,7 @@ async function getDashboardData(): Promise<DashboardData> {
     }
   }
 
-  const [tags, institutionRows, transactionRows, recurringRows] = await Promise.all([
+  const [tags, institutionRows, transactionRows, recurringRows, prefs, fxRates] = await Promise.all([
     getTags(supabase),
     getInstitutions(supabase),
     // The dashboard's widest window is "Year" (last 365 days). A row-count
@@ -56,17 +60,29 @@ async function getDashboardData(): Promise<DashboardData> {
       startDate: formatDateOnly(new Date(Date.now() - 366 * 24 * 60 * 60 * 1000)),
     }),
     getRecurringTransactions(supabase, { activeOnly: true }),
+    user
+      ? getDashboardPrefs(supabase, user.id)
+      : Promise.resolve({
+          displayName: null,
+          baseCurrency: DEFAULT_CURRENCY,
+          layout: sanitizeLayout(null),
+        }),
+    getFxRates(),
   ]);
 
   // Investment accounts don't carry a manually-adjusted balance — it's
   // whatever the account is actually holding (crypto at live price,
-  // uninvested cash 1:1, stock at invested amount).
+  // uninvested cash 1:1, stock at invested amount). Holdings are priced in
+  // USD, so the total is converted into the institution's own currency.
   const investmentRows = institutionRows.filter((row) => row.type === "investment");
   const investmentSummaries = await Promise.all(
     investmentRows.map((row) => getInvestmentSummary(supabase, row.id)),
   );
   const investmentBalanceById = new Map(
-    investmentRows.map((row, i) => [row.id, investmentSummaries[i].totalValue]),
+    investmentRows.map((row, i) => [
+      row.id,
+      convert(investmentSummaries[i].totalValue, "USD", row.currency, fxRates),
+    ]),
   );
 
   const institutions: Institution[] = institutionRows.map((row) => ({
@@ -74,6 +90,7 @@ async function getDashboardData(): Promise<DashboardData> {
     name: row.name,
     type: row.type,
     balance: investmentBalanceById.get(row.id) ?? row.current_balance,
+    currency: row.currency,
   }));
 
   const transactions: Transaction[] = transactionRows.map((row) => ({
@@ -82,6 +99,7 @@ async function getDashboardData(): Promise<DashboardData> {
     tags: row.tags,
     institutionName: row.institutionName,
     amount: row.amount,
+    currency: row.currency,
     direction: row.direction,
     date: row.date,
   }));
@@ -92,6 +110,7 @@ async function getDashboardData(): Promise<DashboardData> {
     tags: row.tags,
     institutionName: row.institutionName,
     amount: row.amount,
+    currency: row.currency,
     direction: row.direction,
     frequency: row.frequency,
     startDate: row.start_date,
@@ -105,6 +124,10 @@ async function getDashboardData(): Promise<DashboardData> {
     recurringTransactions,
     tags: tagOptions,
     isAdmin: isAdminEmail(user?.email),
+    displayName: prefs.displayName,
+    dashboardLayout: prefs.layout,
+    baseCurrency: prefs.baseCurrency,
+    fxRates,
   };
 }
 

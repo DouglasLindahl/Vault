@@ -12,7 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { currency, useChartColors, ChartTooltip } from "@/components/charts/chart-utils";
+import { useChartMoney, useChartColors, ChartTooltip } from "@/components/charts/chart-utils";
 
 export function InvestmentsChart({
   totalInvested,
@@ -26,6 +26,7 @@ export function InvestmentsChart({
   investedOverTime: { label: string; invested: number }[];
 }) {
   const colors = useChartColors();
+  const currency = useChartMoney();
   const gain = totalValue - totalInvested;
 
   return (

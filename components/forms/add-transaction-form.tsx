@@ -10,7 +10,7 @@ import type { Direction, Frequency } from "@/lib/types/database";
 import type { TagOption } from "@/lib/types";
 import { cn, todayDateOnly } from "@/lib/utils";
 
-type InstitutionOption = { id: string; name: string };
+type InstitutionOption = { id: string; name: string; currency?: string };
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,15 +28,19 @@ import { TagPicker } from "@/components/forms/tag-picker";
 export function AddTransactionForm({
   institutions,
   tags,
+  defaultInstitutionId,
   onSuccess,
 }: {
   institutions: InstitutionOption[];
   tags: TagOption[];
+  // Pre-selects the institution (e.g. when opened from its own page).
+  defaultInstitutionId?: string;
   onSuccess?: () => void;
 }) {
   const router = useRouter();
 
-  const [institutionId, setInstitutionId] = useState("");
+  const [institutionId, setInstitutionId] = useState(defaultInstitutionId ?? "");
+  const selectedCurrency = institutions.find((i) => i.id === institutionId)?.currency;
   const [availableTags, setAvailableTags] = useState<TagOption[]>(tags);
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [name, setName] = useState("");
@@ -173,7 +177,9 @@ export function AddTransactionForm({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="amount">Amount</Label>
+          <Label htmlFor="amount">
+            Amount{selectedCurrency ? ` (${selectedCurrency})` : ""}
+          </Label>
           <Input
             id="amount"
             type="number"

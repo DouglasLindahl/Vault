@@ -1,7 +1,12 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { getInstitutionById } from "@/lib/queries/institutions";
+import { getInstitutionById, getInstitutions } from "@/lib/queries/institutions";
+import { getTags } from "@/lib/queries/tags";
+import { getFxRates } from "@/lib/fx";
+import { convert, formatMoney } from "@/lib/currency";
+import { AddTransactionDialog } from "@/components/forms/add-transaction-dialog";
+import { InstitutionCurrencyPicker } from "@/components/forms/institution-currency-picker";
 import { getTransactions } from "@/lib/queries/transactions";
 import { getRecurringTransactions } from "@/lib/queries/recurring-transactions";
 import { getInvestmentSummary } from "@/lib/queries/investments";
@@ -15,14 +20,6 @@ import { TagChips } from "@/components/tag-chips";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageLoading } from "@/components/ui/spinner";
 import { parseDateOnly } from "@/lib/utils";
-
-function currency(n: number) {
-  const sign = n < 0 ? "-" : "";
-  return `${sign}$${Math.abs(n).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
 
 const frequencyLabel = {
   daily: "Daily",
@@ -38,10 +35,18 @@ async function InstitutionDetail({ id }: { id: string }) {
   const institution = await getInstitutionById(supabase, id);
   if (!institution) notFound();
 
-  const [transactions, recurring] = await Promise.all([
+  const [transactions, recurring, allInstitutions, tags, rates] = await Promise.all([
     getTransactions(supabase, { institutionId: id }),
     getRecurringTransactions(supabase, { institutionId: id }),
+    getInstitutions(supabase),
+    getTags(supabase),
+    getFxRates(),
   ]);
+
+  // This account's amounts are in its own currency; holdings are priced
+  // in USD (see lib/queries/investments.ts).
+  const currency = (n: number) => formatMoney(n, institution.currency);
+  const usd = (n: number) => formatMoney(n, "USD");
 
   const tagSpend = (() => {
     const totals = new Map<string, number>();
@@ -70,7 +75,7 @@ async function InstitutionDetail({ id }: { id: string }) {
   if (institution.type === "investment") {
     const summary = await getInvestmentSummary(supabase, id);
     holdingsView = summary.positions;
-    investmentBalance = summary.totalValue;
+    investmentBalance = convert(summary.totalValue, "USD", institution.currency, rates);
   }
 
   const displayBalance =
@@ -91,11 +96,25 @@ async function InstitutionDetail({ id }: { id: string }) {
           <span className="text-2xl font-bold tabular-nums text-foreground dark:text-white">
             {currency(displayBalance)}
           </span>
+          <InstitutionCurrencyPicker
+            institutionId={institution.id}
+            currency={institution.currency}
+          />
+          <AddTransactionDialog
+            institutions={allInstitutions.map((i) => ({
+              id: i.id,
+              name: i.name,
+              currency: i.currency,
+            }))}
+            tags={tags}
+            defaultInstitutionId={institution.id}
+          />
           {institution.type === "bank" && (
             <AdjustBalanceDialog
               institutionId={institution.id}
               institutionName={institution.name}
               currentBalance={institution.current_balance}
+              currency={institution.currency}
             />
           )}
           <DeleteInstitutionDialog
@@ -148,7 +167,7 @@ async function InstitutionDetail({ id }: { id: string }) {
                       {h.value != null ? (
                         <>
                           <p className="text-sm font-semibold tabular-nums text-foreground dark:text-white">
-                            {currency(h.value)}
+                            {usd(h.value)}
                           </p>
                           <p
                             className={
@@ -158,12 +177,12 @@ async function InstitutionDetail({ id }: { id: string }) {
                             }
                           >
                             {delta !== null && delta >= 0 ? "+" : ""}
-                            {delta !== null ? currency(delta) : null} · {currency(h.invested)} invested
+                            {delta !== null ? usd(delta) : null} · {usd(h.invested)} invested
                           </p>
                         </>
                       ) : (
                         <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                          {currency(h.invested)} invested
+                          {usd(h.invested)} invested
                         </p>
                       )}
                     </div>

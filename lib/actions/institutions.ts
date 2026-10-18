@@ -3,9 +3,12 @@
 // See lib/actions/transactions.ts for why these need to be server actions
 // rather than being called directly from client components.
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { isCurrency } from "@/lib/currency";
 import {
   createInstitution,
+  updateInstitution,
   setInstitutionBalance,
   deleteInstitution,
   reorderInstitutions,
@@ -20,7 +23,9 @@ export async function createInstitutionAction(input: {
   type: InstitutionType;
   startingBalance: number;
   asOfDate: string;
+  currency: string;
 }) {
+  if (!isCurrency(input.currency)) throw new Error("Unsupported currency.");
   const supabase = await createClient();
   const {
     data: { user },
@@ -33,6 +38,7 @@ export async function createInstitutionAction(input: {
     type: input.type,
     starting_balance: input.startingBalance,
     starting_balance_date: input.asOfDate,
+    currency: input.currency,
   });
 }
 
@@ -43,6 +49,15 @@ export async function updateInstitutionBalanceAction(
 ) {
   const supabase = await createClient();
   await setInstitutionBalance(supabase, id, currentBalance, asOfDate);
+}
+
+// Relabels the institution's currency. Amounts aren't converted — this is
+// for saying "these numbers were SEK all along", not for moving money.
+export async function updateInstitutionCurrencyAction(id: string, currency: string) {
+  if (!isCurrency(currency)) throw new Error("Unsupported currency.");
+  const supabase = await createClient();
+  await updateInstitution(supabase, id, { currency });
+  revalidatePath("/protected", "layout");
 }
 
 export async function deleteInstitutionAction(id: string) {

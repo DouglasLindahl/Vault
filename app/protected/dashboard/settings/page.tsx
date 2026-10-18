@@ -8,6 +8,7 @@ import { ChangePasswordForm } from "@/components/settings/change-password-form";
 import { DeleteAccountSection } from "@/components/settings/delete-account-section";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { DashboardSettings } from "@/components/settings/dashboard-settings";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PageLoading } from "@/components/ui/spinner";
 
@@ -64,6 +65,20 @@ async function SettingsContent() {
           </CardHeader>
           <CardContent>
             <ThemeSwitcher />
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
+          <CardHeader>
+            <CardTitle className="text-base text-foreground dark:text-white">
+              Dashboard
+            </CardTitle>
+            <CardDescription>
+              Choose which cards you see, rearrange them, and pick your colors and layout.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DashboardSettings />
           </CardContent>
         </Card>
 

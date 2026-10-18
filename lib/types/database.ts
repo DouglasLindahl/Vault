@@ -18,6 +18,8 @@ export type Institution = {
   starting_balance: number;
   starting_balance_date: string; // date
   current_balance: number;
+  // ISO code; balances/transactions of this institution are in it.
+  currency: string;
   // true once the balance is derived from starting_balance(+_date) plus
   // transactions — see lib/queries/institutions.ts.
   balance_anchored: boolean;
@@ -32,6 +34,7 @@ export type InstitutionInsert = {
   starting_balance?: number;
   starting_balance_date?: string;
   current_balance?: number;
+  currency?: string;
   balance_anchored?: boolean;
   sort_order?: number;
 };
@@ -92,6 +95,7 @@ export type RecurringTransactionInsert = {
 export type RecurringTransactionWithRelations = RecurringTransaction & {
   tags: Tag[];
   institutionName: string;
+  currency: string; // the institution's — amounts are in it
 };
 
 export type RecurringTransactionUpdate = Partial<
@@ -132,6 +136,7 @@ export type TransactionUpdate = Partial<Omit<TransactionInsert, "user_id">>;
 export type TransactionWithRelations = Transaction & {
   tags: Tag[];
   institutionName: string;
+  currency: string; // the institution's — amounts are in it
 };
 
 // ---------------------------------------------------
@@ -279,6 +284,8 @@ export type Profile = {
   terms_version: string | null;
   privacy_accepted_at: string | null;
   privacy_version: string | null;
+  // Raw JSON — always read through sanitizeLayout() (lib/dashboard-layout.ts).
+  dashboard_layout?: unknown;
   created_at: string;
 };
 

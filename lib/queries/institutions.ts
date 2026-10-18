@@ -5,6 +5,7 @@ import type {
   InstitutionUpdate,
 } from "@/lib/types/database";
 import { decryptAmount, decryptNullable, encryptAmount, encryptNullable } from "@/lib/encryption";
+import { toCurrency } from "@/lib/currency";
 
 // RLS scopes every row to auth.uid() already, so these queries
 // don't need an explicit user_id filter — Postgres enforces it.
@@ -21,6 +22,7 @@ function decryptRow(row: RawInstitutionRow): Institution {
   return {
     ...row,
     name: decryptNullable(row.name) as string,
+    currency: toCurrency(row.currency),
     starting_balance: decryptAmount(row.starting_balance),
     current_balance: decryptAmount(row.current_balance),
   };

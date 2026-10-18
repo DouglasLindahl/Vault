@@ -6,11 +6,12 @@ import type {
   RecurringTransactionWithRelations,
 } from "@/lib/types/database";
 import { decryptAmount, decryptNullable, encryptAmount, encryptNullable } from "@/lib/encryption";
+import { toCurrency } from "@/lib/currency";
 
 const WITH_RELATIONS_SELECT =
-  "*, institutions(name), recurring_transaction_tags(tags(id,name,color))" as const;
+  "*, institutions(name, currency), recurring_transaction_tags(tags(id,name,color))" as const;
 const WITH_RELATIONS_SELECT_INNER_TAGS =
-  "*, institutions(name), recurring_transaction_tags!inner(tags(id,name,color))" as const;
+  "*, institutions(name, currency), recurring_transaction_tags!inner(tags(id,name,color))" as const;
 
 // `name`/`amount` are encrypted at rest (see supabase/sql/phase7_encryption.sql).
 type RawRecurringTransactionRow = Omit<RecurringTransaction, "name" | "amount"> & {
@@ -42,6 +43,7 @@ function mapWithRelations(row: any): RecurringTransactionWithRelations {
     // ciphertext unless decrypted, same bug already fixed in
     // lib/queries/recurring-transaction-pending.ts.
     institutionName: institutions?.name ? (decryptNullable(institutions.name) as string) : "Unknown",
+    currency: toCurrency(institutions?.currency),
   };
 }
 

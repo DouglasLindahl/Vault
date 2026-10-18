@@ -18,8 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const CURRENCIES = ["USD", "EUR", "GBP", "CAD", "AUD", "JPY", "SEK", "NOK"];
+import { CURRENCIES } from "@/lib/currency";
 
 export function ProfileForm({ profile }: { profile: Profile }) {
   const router = useRouter();

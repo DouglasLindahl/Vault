@@ -6,32 +6,36 @@ import { getRecurringTransactions } from "@/lib/queries/recurring-transactions";
 import { getInvestmentSummary } from "@/lib/queries/investments";
 import { StatsCharts } from "@/components/charts/stats-charts";
 import { MONTHLY_MULTIPLIER } from "@/lib/recurrence";
+import { getBaseCurrency } from "@/lib/queries/dashboard-layout";
+import { getFxRates } from "@/lib/fx";
+import { convert, formatMoney } from "@/lib/currency";
 import { CashFlowChart } from "@/components/charts/cash-flow-chart";
 import { InvestmentsChart } from "@/components/charts/investments-chart";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { PageLoading } from "@/components/ui/spinner";
 
-function currency(n: number) {
-  const sign = n < 0 ? "-" : "";
-  return `${sign}$${Math.abs(n).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
-
+// Every figure on this page is in the user's display currency: amounts are
+// converted from their institution's currency (holdings from USD) first.
 async function StatsContent() {
   const supabase = await createClient();
 
-  const [institutions, transactions, recurring] = await Promise.all([
+  const [institutions, transactions, recurring, base, rates] = await Promise.all([
     getInstitutions(supabase),
     getTransactions(supabase),
     getRecurringTransactions(supabase, { activeOnly: true }),
+    getBaseCurrency(supabase),
+    getFxRates(),
   ]);
+  const toBase = (amount: number, from: string) => convert(amount, from, base, rates);
+  const currency = (n: number) => formatMoney(n, base);
 
   const recurringByInstitution = new Map<string, number>();
   const recurringByTag = new Map<string, number>();
   for (const r of recurring) {
-    const monthly = (r.direction === "in" ? r.amount : -r.amount) * MONTHLY_MULTIPLIER[r.frequency];
+    const monthly = toBase(
+      (r.direction === "in" ? r.amount : -r.amount) * MONTHLY_MULTIPLIER[r.frequency],
+      r.currency,
+    );
     recurringByInstitution.set(
       r.institutionName,
       (recurringByInstitution.get(r.institutionName) ?? 0) + monthly,
@@ -52,8 +56,11 @@ async function StatsContent() {
     amount,
   }));
 
+  // Converted once; everything below works in the display currency.
+  const baseTransactions = transactions.map((t) => ({ ...t, amount: toBase(t.amount, t.currency) }));
+
   const tagSpend = new Map<string, number>();
-  for (const t of transactions) {
+  for (const t of baseTransactions) {
     if (t.direction !== "out") continue;
     if (t.tags.length === 0) {
       tagSpend.set("Untagged", (tagSpend.get("Untagged") ?? 0) + t.amount);
@@ -68,36 +75,38 @@ async function StatsContent() {
     .sort((a, b) => b.amount - a.amount)
     .slice(0, 8);
 
-  const totalIncome = transactions
+  const totalIncome = baseTransactions
     .filter((t) => t.direction === "in")
     .reduce((s, t) => s + t.amount, 0);
-  const totalExpense = transactions
+  const totalExpense = baseTransactions
     .filter((t) => t.direction === "out")
     .reduce((s, t) => s + t.amount, 0);
 
   // Investment accounts don't carry a manually-adjusted balance — it's
   // whatever the account is actually holding (crypto at live price,
-  // uninvested cash 1:1, stock at invested amount).
+  // uninvested cash 1:1, stock at invested amount), priced in USD.
   const investmentInstitutions = institutions.filter((i) => i.type === "investment");
   const investmentSummaries = await Promise.all(
     investmentInstitutions.map((i) => getInvestmentSummary(supabase, i.id)),
   );
-  const investmentBalanceById = new Map(
-    investmentInstitutions.map((i, idx) => [i.id, investmentSummaries[idx].totalValue]),
+  const investmentValueById = new Map(
+    investmentInstitutions.map((i, idx) => [i.id, toBase(investmentSummaries[idx].totalValue, "USD")]),
   );
 
-  const netWorth = institutions.reduce(
-    (s, a) => s + (investmentBalanceById.get(a.id) ?? a.current_balance),
-    0,
-  );
+  const balanceInBase = (a: (typeof institutions)[number]) =>
+    investmentValueById.get(a.id) ?? toBase(a.current_balance, a.currency);
+  const netWorth = institutions.reduce((s, a) => s + balanceInBase(a), 0);
   const balanceByAccount = institutions
-    .map((a) => ({
-      name: a.name,
-      balance: investmentBalanceById.get(a.id) ?? a.current_balance,
-    }))
+    .map((a) => ({ name: a.name, balance: balanceInBase(a) }))
     .sort((a, b) => b.balance - a.balance);
 
-  const allPositions = investmentSummaries.flatMap((s) => s.positions);
+  const allPositions = investmentSummaries
+    .flatMap((s) => s.positions)
+    .map((p) => ({
+      ...p,
+      invested: toBase(p.invested, "USD"),
+      value: p.value == null ? null : toBase(p.value, "USD"),
+    }));
   const totalInvested = allPositions.reduce((s, p) => s + p.invested, 0);
   const totalInvestmentValue = allPositions.reduce((s, p) => s + (p.value ?? p.invested), 0);
 
@@ -173,7 +182,7 @@ async function StatsContent() {
 
       <div className="mb-6">
         <CashFlowChart
-          transactions={transactions.map((t) => ({
+          transactions={baseTransactions.map((t) => ({
             date: t.date,
             direction: t.direction,
             amount: t.amount,

@@ -16,14 +16,16 @@ import {
 import { AddTransactionForm } from "@/components/forms/add-transaction-form";
 import type { TagOption } from "@/lib/types";
 
-type InstitutionOption = { id: string; name: string };
+type InstitutionOption = { id: string; name: string; currency?: string };
 
 export function AddTransactionDialog({
   institutions,
   tags,
+  defaultInstitutionId,
 }: {
   institutions: InstitutionOption[];
   tags: TagOption[];
+  defaultInstitutionId?: string;
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -53,6 +55,7 @@ export function AddTransactionDialog({
         <AddTransactionForm
           institutions={institutions}
           tags={tags}
+          defaultInstitutionId={defaultInstitutionId}
           onSuccess={handleSuccess}
         />
       </DialogContent>

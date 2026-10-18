@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { currency, useChartColors, ChartTooltip } from "@/components/charts/chart-utils";
+import { useChartMoney, useChartColors, ChartTooltip } from "@/components/charts/chart-utils";
 
 type SortMode = "amount-desc" | "amount-asc" | "alpha";
 
@@ -46,6 +46,7 @@ function SortableBarCard({
 }) {
   const [sortMode, setSortMode] = useState<SortMode>("amount-desc");
   const colors = useChartColors();
+  const currency = useChartMoney();
   const sorted = useMemo(() => sortData(data, sortMode), [data, sortMode]);
 
   return (

@@ -22,16 +22,10 @@ import { CSS } from "@dnd-kit/utilities";
 
 import { reorderInstitutionsAction } from "@/lib/actions/institutions";
 import type { Institution } from "@/lib/types";
-
-function currency(n: number) {
-  const sign = n < 0 ? "-" : "";
-  return `${sign}$${Math.abs(n).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
+import { useMoney } from "@/app/protected/dashboard/dashboard-provider";
 
 function SortableAccountRow({ account }: { account: Institution }) {
+  const { format } = useMoney();
   const {
     attributes,
     listeners,
@@ -77,7 +71,7 @@ function SortableAccountRow({ account }: { account: Institution }) {
       </div>
       <div className="flex shrink-0 items-center gap-1">
         <span className="text-sm font-semibold tabular-nums text-foreground dark:text-white">
-          {currency(account.balance)}
+          {format(account.balance, account.currency)}
         </span>
         <Link
           href={`/protected/dashboard/institutions/${account.id}`}

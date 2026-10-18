@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { createInstitutionAction } from "@/lib/actions/institutions";
 import type { InstitutionType } from "@/lib/types/database";
 import { todayDateOnly } from "@/lib/utils";
+import { useDashboardData } from "@/app/protected/dashboard/dashboard-provider";
+import { CurrencySelect } from "@/components/forms/currency-select";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,9 +21,11 @@ import {
 
 export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter();
+  const { baseCurrency } = useDashboardData();
 
   const [name, setName] = useState("");
   const [type, setType] = useState<InstitutionType>("bank");
+  const [currency, setCurrency] = useState(baseCurrency);
   const [startingBalance, setStartingBalance] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +47,7 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
         type,
         startingBalance: startingBalance ? Number(startingBalance) : 0,
         asOfDate: todayDateOnly(),
+        currency,
       });
 
       if (onSuccess) {
@@ -88,17 +93,23 @@ export function AddInstitutionForm({ onSuccess }: { onSuccess?: () => void }) {
         </div>
       </div>
 
-      <div className="grid gap-2">
-        <Label htmlFor="starting-balance">Current balance</Label>
-        <Input
-          id="starting-balance"
-          type="number"
-          step="0.01"
-          placeholder="0"
-          value={startingBalance}
-          onChange={(e) => setStartingBalance(e.target.value)}
-          className="h-11 rounded-2xl sm:w-48"
-        />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <Label>Currency</Label>
+          <CurrencySelect value={currency} onChange={setCurrency} />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="starting-balance">Current balance ({currency})</Label>
+          <Input
+            id="starting-balance"
+            type="number"
+            step="0.01"
+            placeholder="0"
+            value={startingBalance}
+            onChange={(e) => setStartingBalance(e.target.value)}
+            className="h-11 rounded-2xl"
+          />
+        </div>
       </div>
 
       {error && (

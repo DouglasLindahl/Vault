@@ -13,14 +13,7 @@ import {
 } from "@/components/ui/select";
 import { parseDateOnly } from "@/lib/utils";
 import type { TransactionWithRelations } from "@/lib/types/database";
-
-function currency(n: number) {
-  const sign = n < 0 ? "-" : "";
-  return `${sign}$${Math.abs(n).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
+import { useMoney } from "@/app/protected/dashboard/dashboard-provider";
 
 const ALL = "__all__";
 
@@ -37,6 +30,7 @@ export function TransactionsList({
   transactions: TransactionWithRelations[];
   institutions: { id: string; name: string }[];
 }) {
+  const { format } = useMoney();
   const [sortBy, setSortBy] = useState<SortBy>("newest");
   const [institutionFilter, setInstitutionFilter] = useState<string>(ALL);
 
@@ -134,7 +128,7 @@ export function TransactionsList({
                         : "text-sm font-semibold tabular-nums text-foreground dark:text-white"
                     }
                   >
-                    {t.direction === "in" ? currency(t.amount) : currency(-t.amount)}
+                    {format(t.direction === "in" ? t.amount : -t.amount, t.currency)}
                   </span>
                   <DeleteRowButton kind="transaction" id={t.id} />
                 </div>

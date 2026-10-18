@@ -12,10 +12,12 @@ import { Label } from "@/components/ui/label";
 export function AdjustBalanceForm({
   institutionId,
   currentBalance,
+  currency,
   onSuccess,
 }: {
   institutionId: string;
   currentBalance: number;
+  currency?: string;
   onSuccess?: () => void;
 }) {
   const router = useRouter();
@@ -53,7 +55,9 @@ export function AdjustBalanceForm({
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6">
       <div className="grid gap-2">
-        <Label htmlFor="adjust-balance">New balance</Label>
+        <Label htmlFor="adjust-balance">
+          New balance{currency ? ` (${currency})` : ""}
+        </Label>
         <Input
           id="adjust-balance"
           type="number"

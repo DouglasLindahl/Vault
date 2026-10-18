@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import { useMoney } from "@/app/protected/dashboard/dashboard-provider";
 
 // Validated categorical/sequential steps from the design system's reference
 // palette (dataviz skill) — light/dark pairs, used as-is (not re-derived).
@@ -26,11 +27,11 @@ export const COLORS = {
   },
 };
 
-export function currency(n: number) {
-  const sign = n < 0 ? "-" : "";
-  return `${sign}$${Math.abs(n).toLocaleString(undefined, {
-    maximumFractionDigits: 0,
-  })}`;
+// Whole-unit amounts in the user's display currency — chart data is always
+// converted to it before it reaches a chart.
+export function useChartMoney() {
+  const { format } = useMoney();
+  return (n: number) => format(n, undefined, 0);
 }
 
 export function useChartColors() {
@@ -46,7 +47,7 @@ export function ChartTooltip({
   payload,
   label,
   colors,
-  formatValue = currency,
+  formatValue,
 }: {
   active?: boolean;
   payload?: { name: string; value: number; color: string }[];
@@ -54,6 +55,8 @@ export function ChartTooltip({
   colors: typeof COLORS.light;
   formatValue?: (n: number) => string;
 }) {
+  const money = useChartMoney();
+  const format = formatValue ?? money;
   if (!active || !payload || payload.length === 0) return null;
   return (
     <div
@@ -71,7 +74,7 @@ export function ChartTooltip({
             className="inline-block h-0.5 w-3"
             style={{ backgroundColor: p.color }}
           />
-          <span className="font-semibold tabular-nums">{formatValue(p.value)}</span>
+          <span className="font-semibold tabular-nums">{format(p.value)}</span>
           <span>{p.name}</span>
         </div>
       ))}

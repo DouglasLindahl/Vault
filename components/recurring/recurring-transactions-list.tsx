@@ -15,14 +15,7 @@ import {
 } from "@/components/ui/select";
 import type { RecurringTransactionWithRelations } from "@/lib/types/database";
 import type { TagOption } from "@/lib/types";
-
-function currency(n: number) {
-  const sign = n < 0 ? "-" : "";
-  return `${sign}$${Math.abs(n).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
+import { useMoney } from "@/app/protected/dashboard/dashboard-provider";
 
 const frequencyLabel = {
   daily: "Daily",
@@ -32,9 +25,13 @@ const frequencyLabel = {
   yearly: "Yearly",
 } as const;
 
-// Monthly equivalent, so weekly/yearly/etc. items add up sensibly.
-function signedMonthlyAmount(r: RecurringTransactionWithRelations) {
-  const monthly = monthlyAmount(r.amount, r.frequency);
+// Monthly equivalent in the display currency, so weekly/yearly/etc. items
+// from accounts in different currencies add up sensibly.
+function signedMonthlyAmount(
+  r: RecurringTransactionWithRelations,
+  toBase: (amount: number, from: string) => number,
+) {
+  const monthly = toBase(monthlyAmount(r.amount, r.frequency), r.currency);
   return r.direction === "in" ? monthly : -monthly;
 }
 
@@ -88,6 +85,7 @@ function groupRecurring(
 }
 
 function RecurringRow({ r }: { r: RecurringTransactionWithRelations }) {
+  const { format } = useMoney();
   const next = nextOccurrence(r.start_date, r.frequency);
   return (
     <div className="flex items-center justify-between rounded-xl px-2 py-2.5 hover:bg-zinc-50 dark:hover:bg-white/[0.03]">
@@ -125,12 +123,13 @@ function RecurringRow({ r }: { r: RecurringTransactionWithRelations }) {
               : "text-sm font-semibold tabular-nums text-foreground dark:text-white"
           }
         >
-          {r.direction === "in" ? currency(r.amount) : currency(-r.amount)}
+          {format(r.direction === "in" ? r.amount : -r.amount, r.currency)}
         </span>
         <EditRecurringAmountButton
           id={r.id}
           name={r.name ?? (r.direction === "in" ? "Income" : "Expense")}
           amount={r.amount}
+          currency={r.currency}
         />
         <DeleteRowButton kind="recurring-transaction" id={r.id} />
       </div>
@@ -139,7 +138,8 @@ function RecurringRow({ r }: { r: RecurringTransactionWithRelations }) {
 }
 
 function GroupCard({ group }: { group: Group }) {
-  const subtotal = group.items.reduce((sum, r) => sum + signedMonthlyAmount(r), 0);
+  const { toBase, format } = useMoney();
+  const subtotal = group.items.reduce((sum, r) => sum + signedMonthlyAmount(r, toBase), 0);
   return (
     <Card className="rounded-[28px] border-border bg-card/95 shadow-[0_18px_60px_rgba(23,32,51,0.06)] backdrop-blur">
       <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-2">
@@ -151,7 +151,7 @@ function GroupCard({ group }: { group: Group }) {
               : "text-sm font-semibold tabular-nums text-zinc-500 dark:text-zinc-400"
           }
         >
-          {currency(subtotal)}/mo
+          {format(subtotal)}/mo
         </p>
       </CardHeader>
       <CardContent className="flex flex-col gap-1">
@@ -167,10 +167,11 @@ const ALL = "__all__";
 const UNTAGGED = "__untagged__";
 
 function Total({ label, value, className }: { label: string; value: number; className: string }) {
+  const { format } = useMoney();
   return (
     <div>
       <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">{label}</p>
-      <p className={`text-2xl font-bold tabular-nums ${className}`}>{currency(value)}</p>
+      <p className={`text-2xl font-bold tabular-nums ${className}`}>{format(value)}</p>
     </div>
   );
 }
@@ -199,17 +200,18 @@ export function RecurringTransactionsList({
     [recurring, tagFilter, institutionFilter],
   );
 
+  const { toBase } = useMoney();
   const groups = useMemo(() => groupRecurring(filtered, groupBy), [filtered, groupBy]);
   const totals = useMemo(() => {
     let totalIn = 0;
     let totalOut = 0;
     for (const r of filtered) {
-      const monthly = monthlyAmount(r.amount, r.frequency);
+      const monthly = toBase(monthlyAmount(r.amount, r.frequency), r.currency);
       if (r.direction === "in") totalIn += monthly;
       else totalOut += monthly;
     }
     return { totalIn, totalOut, net: totalIn - totalOut };
-  }, [filtered]);
+  }, [filtered, toBase]);
 
   if (recurring.length === 0) {
     return (
